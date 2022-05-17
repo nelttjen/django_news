@@ -15,10 +15,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponseRedirect as redirect
 
 from news.views import *
+from news_django.settings import DEBUG
+
+
+def to_news(r):
+    return redirect('/news/')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('news/', include('news.urls')),
+    path('auth/', include('authorize.urls')),
+    path('', to_news),
 ]
+if DEBUG:
+    urlpatterns = [
+
+    ] + urlpatterns

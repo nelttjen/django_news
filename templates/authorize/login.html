@@ -22,6 +22,7 @@
                 <input type="checkbox" name="remember" id="remember" style="cursor: pointer;" {% if form.remember.initial %}checked{% endif %}>
                 <label for="remember" class="form-label" style="cursor: pointer; user-select: none;">{{form.remember.label}}</label>
             </p>
+            <p>Нет аккаунта? <a href="/auth/register">Зарегестрироваться</a></p>
             <button type="submit" class="btn btn-primary">Войти</button>
         </form>
     </div>

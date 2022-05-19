@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href={% static "authorize/css/register.css" %}>
+{% endblock head %}
+{% block container %}
+    <div class="register-form">
+        <h1>Регистрация</h1>
+        {% include "include/messages.html"%}
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p>
+                <label for="login" class="form-label">{{form.login.label}}</label>
+                <input type="text" name="login" id="login" class="form-control" placeholder="Введите логин">
+            </p>
+            <p>
+                <label for="email" class="form-label">{{form.email.label}}</label>
+                <input type="email" name="email" id="email" class="form-control" placeholder="Введите Email">
+            </p>
+            <p>
+                <label for="pass1" class="form-label">{{form.pass1.label}}</label>
+                <input type="password" name="pass1" id="pass1" class="form-control" placeholder="Введите пароль">
+            </p>
+            <p>
+                <label for="pass2" class="form-label">{{form.pass2.label}}</label>
+                <input type="password" name="pass2" id="pass2" class="form-control" placeholder="Повторите пароль">
+            </p>
+            <p>
+                <input type="checkbox" name="rule_accepted" id="rule_accepted" style="cursor: pointer;">
+                <label for="rule_accepted" style="cursor: pointer; user-select: none;">Принимаю условия <a href="/auth/rules">пользовательского соглашения</a></label>
+            </p>
+            <p>Уже есть аккаунт? <a href="/auth/login">Войти</a></p>
+            <button class="btn btn-primary" type="submit">Зарегестрироваться</button>
+        </form>
+    </div>
+{% endblock container %}

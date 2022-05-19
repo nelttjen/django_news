@@ -6,7 +6,11 @@ from .views import *
 
 urlpatterns = [
     path('login/', def_login, name='login'),
+    path('profile/', to_login, name='profile'),
+    path('register/', def_register, name='register'),
+
     path(r'', to_login, name='home'),
+
 ]
 
 if DEBUG:

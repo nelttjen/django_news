@@ -1,0 +1,7 @@
+.login-form {
+    height: fit-content;
+    width: fit-content;
+    border: 1px solid coral;
+    padding: 25px;
+    margin: auto;
+}

@@ -31,3 +31,27 @@ body {
 .container {
     margin-top: 20px;
 }
+
+.messages {
+    padding: 5px;
+}
+
+.messages li {
+    list-style-type: none;
+}
+
+.messages li.info {
+    color: blueviolet;
+}
+
+.messages li.warning {
+    color: orange;
+}
+
+.messages li.success {
+    color: green;
+}
+
+.messages li.error {
+    color: crimson;
+}

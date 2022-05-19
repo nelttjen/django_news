@@ -5,7 +5,7 @@ from news_django.settings import DEBUG
 from .views import *
 
 urlpatterns = [
-    path('login/', login, name='login'),
+    path('login/', def_login, name='login'),
     path(r'', to_login, name='home'),
 ]
 

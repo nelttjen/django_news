@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 
+from django.contrib import messages
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,9 +30,12 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1']
 
 # static urls
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
+        os.path.join(BASE_DIR, 'authorize\\static'),
+        os.path.join(BASE_DIR, 'news\\static'),
+
+        os.path.join(BASE_DIR, 'static')
 )
 
 # Application definition
@@ -119,13 +124,16 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-
-STATIC_URL = 'static/'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# messages classes
+MESSAGES_CLASSES = {
+    messages.DEBUG: 'message-debug',
+    messages.INFO: 'message-info',
+    messages.SUCCESS: 'message-success',
+    messages.WARNING: 'message-warning',
+    messages.ERROR: 'message-error',
+}

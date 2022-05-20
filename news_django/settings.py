@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+
+from django.contrib import messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,8 +27,16 @@ SECRET_KEY = 'django-insecure-@m(qr1_-w2stz#ex5(ot8f1a#ljfz$vv(r&sj!69*ls*8t79ge
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
+# static urls
+STATIC_URL = 'static/'
+STATICFILES_DIRS = (
+        os.path.join(BASE_DIR, 'authorize\\static'),
+        os.path.join(BASE_DIR, 'news\\static'),
+
+        os.path.join(BASE_DIR, 'static')
+)
 
 # Application definition
 
@@ -37,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'news.apps.NewsConfig',
+    'authorize.apps.AuthorizeConfig',
 ]
 
 MIDDLEWARE = [
@@ -112,13 +124,16 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-
-STATIC_URL = 'static/'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# messages classes
+MESSAGES_CLASSES = {
+    messages.DEBUG: 'message-debug',
+    messages.INFO: 'message-info',
+    messages.SUCCESS: 'message-success',
+    messages.WARNING: 'message-warning',
+    messages.ERROR: 'message-error',
+}

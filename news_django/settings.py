@@ -34,7 +34,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = (
         os.path.join(BASE_DIR, 'authorize\\static'),
         os.path.join(BASE_DIR, 'news\\static'),
-
+        os.path.join(BASE_DIR, 'user_profile\\static'),
         os.path.join(BASE_DIR, 'static')
 )
 
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'news.apps.NewsConfig',
     'authorize.apps.AuthorizeConfig',
+    'user_profile.apps.UserProfileConfig',
 ]
 
 MIDDLEWARE = [
@@ -66,7 +67,12 @@ ROOT_URLCONF = 'news_django.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'authorize/templates',
+            BASE_DIR / 'news/templates',
+            BASE_DIR / 'user_profile/templates',
+            ]
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -128,12 +134,3 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# messages classes
-MESSAGES_CLASSES = {
-    messages.DEBUG: 'message-debug',
-    messages.INFO: 'message-info',
-    messages.SUCCESS: 'message-success',
-    messages.WARNING: 'message-warning',
-    messages.ERROR: 'message-error',
-}

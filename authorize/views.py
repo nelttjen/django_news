@@ -1,17 +1,17 @@
-from django.contrib import messages
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.http import HttpResponseRedirect as redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
-from django.db.utils import IntegrityError
 import string
 
-from .forms import *
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.shortcuts import render
+from django.http import HttpResponseRedirect as redirect
+from django.db.utils import IntegrityError
 
+
+from .forms import *
+from .models import ExtendedUser
 
 # Create your views here.
-from .models import ExtendedUser
 
 
 def to_login(request):
@@ -33,7 +33,7 @@ def def_login(request):
             if user is not None or user2 is not None:
                 login(request, user if user is not None else user2)
                 if not data.get('remember'):
-                    request.session.set_expiry(2 * 24 * 3600)
+                    request.session.set_expiry(30 * 60)  # 30 mins
                 messages.success(request, 'Вы вошли в аккаунт')
                 return redirect('/profile')
             else:
@@ -77,6 +77,8 @@ def def_register(request):
                 messages.error(request, 'Логин может содержать только буквы латинского алфавита и символ подчеркивания')
             elif not all([i in allow_pass for i in data.get('pass1')]):
                 messages.error(request, 'Пароль может содержать только буквы латинского алфавита и символы $%#_-+=!@')
+            elif data.get('login') == data.get('pass1'):
+                messages.error(request, 'Логин и пароль не должны совпадать')
             elif not strong_check(data.get('pass1')):
                 messages.error(request, 'Пароль должен содержать хотя бы одну заглавную и строчную букву и одну цифру')
             elif data.get('pass1') != data.get('pass2'):
@@ -88,11 +90,10 @@ def def_register(request):
                         email=data.get('email'),
                         password=data.get('pass1'),
                     )
-                    messages.success(request, 'Регистрация успешна!')
-                    new_user = User.objects.filter(username=data.get('login')).first()
                     ExtendedUser.objects.create(
-                        user=new_user
+                        user=User.objects.filter(username=data.get('login')).first()
                     )
+                    messages.success(request, 'Регистрация успешна!')
                     return redirect('/auth/login')
                 except IntegrityError:
                     messages.error(request, 'Логин уже занят')
@@ -110,3 +111,6 @@ def logout_user(request):
     logout(request)
     messages.info(request, 'Вы вышли из аккаунта')
     return redirect('/auth/login')
+
+
+

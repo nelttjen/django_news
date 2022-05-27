@@ -163,3 +163,4 @@ cython_debug/
 static/admin
 static/authorize
 static/news
+*.env

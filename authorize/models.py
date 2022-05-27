@@ -1,15 +1,13 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
-# Create your models here.
-class ExtendedUser(models.Model):
+class ActivatedUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    city = models.CharField(max_length=250, default='')
-    company = models.CharField(max_length=250, default='')
-    websites = models.CharField(max_length=1000, default='')
-    mobile = models.CharField(max_length=50, default='')
-    balance = models.FloatField(default=0.0)
-    total_gained = models.FloatField(default=0.0)
-    total_withdraw = models.FloatField(default=0.0)
+    verification_code = models.CharField(max_length=200, unique=True)
+    activated = models.BooleanField(default=False)
+    valid_until = models.DateTimeField(default=(timezone.now() + datetime.timedelta(seconds=60 * 30)))

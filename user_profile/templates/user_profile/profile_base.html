@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href='{% static 'user_profile/css/profile_base.css' %}?{{reload}}'>
+{% endblock %}
+{% block container %}
+
+    <div class="profile-container">
+        {% include "include/messages.html" %}
+        user_id: {{user.id}}
+        <div class="profile-head">
+            <div class="profile-icon">
+                {% if has_image %}
+                <img class="profile-icon" src="{% static 'user_profile/img/profile_images/{{user.id}}.png' %}" alt="">
+                {% else %}
+                <img class="profile-icon" src="{% static 'user_profile/img/default.png' %}" alt="">
+                {% endif %}
+            </div>
+        </div>
+        <div class="profile-body">
+            {% block profile %}
+            {% endblock profile %}
+        </div>
+        <div class="profile-end">
+            <a href="/auth/logout/">Выйти</a>
+        </div>
+    </div>
+{% endblock %}

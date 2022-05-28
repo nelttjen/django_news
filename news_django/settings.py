@@ -10,9 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
+import environ
 from pathlib import Path
 
 from django.contrib import messages
+
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +27,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@m(qr1_-w2stz#ex5(ot8f1a#ljfz$vv(r&sj!69*ls*8t79ge'
+SECRET_KEY = env('SECRET_KEY', default='unsafe-secret-key-123123423')
+
+# LOGIN stuff
+LOGIN_URL = '/auth/login'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -34,7 +43,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = (
         os.path.join(BASE_DIR, 'authorize\\static'),
         os.path.join(BASE_DIR, 'news\\static'),
-
+        os.path.join(BASE_DIR, 'user_profile\\static'),
         os.path.join(BASE_DIR, 'static')
 )
 
@@ -49,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'news.apps.NewsConfig',
     'authorize.apps.AuthorizeConfig',
+    'user_profile.apps.UserProfileConfig',
 ]
 
 MIDDLEWARE = [
@@ -66,7 +76,12 @@ ROOT_URLCONF = 'news_django.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'authorize/templates',
+            BASE_DIR / 'news/templates',
+            BASE_DIR / 'user_profile/templates',
+            ]
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -129,11 +144,11 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# messages classes
-MESSAGES_CLASSES = {
-    messages.DEBUG: 'message-debug',
-    messages.INFO: 'message-info',
-    messages.SUCCESS: 'message-success',
-    messages.WARNING: 'message-warning',
-    messages.ERROR: 'message-error',
-}
+DOMAIN_NAME = 'http://127.0.0.1:8000'
+
+# Email info
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('EMAIL_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD', default='')

@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block head %}
+    <title>Register</title>
     <link rel="stylesheet" href={% static "authorize/css/register.css" %}>
 {% endblock head %}
 {% block container %}
     <div class="register-form">
         <h1>Регистрация</h1>
-        {% include "include/messages.html"%}
+        {% include "include/messages.html" %}
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <p>

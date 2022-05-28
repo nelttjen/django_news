@@ -2,12 +2,13 @@
 {% load static %}
 {% block head %}
     <title>Login</title>
-    <link rel="stylesheet" href="{% static "authorize/css/login.css"%}">
+    <link rel="stylesheet" href="{% static "authorize/css/login.css" %}?{{ reload }}">
 {% endblock %}
 {% block container %}
     <div class="login-form">
         <h1>Авторизация</h1>
-        {% include "include/messages.html"%}
+        {% include "include/messages.html" %}
+        user_auth: {{ user.is_authenticated }}
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <p>

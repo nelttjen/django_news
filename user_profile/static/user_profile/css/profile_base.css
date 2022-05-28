@@ -1,0 +1,14 @@
+.profile-container {
+    width: 700px;
+    height: fit-content;
+    padding: 30px;
+    border: 1px solid orange;
+    margin: auto;
+}
+
+.profile-icon {
+    width: 256px;
+    height: 256px;
+    border-radius: 50%;
+    outline: 3px solid blue;
+}

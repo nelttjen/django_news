@@ -14,17 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.template.defaulttags import url
 from django.urls import path, include
 from django.http import HttpResponseRedirect as redirect
-from django.views.static import serve
 
 from news.views import *
-from news_django import settings
-from news_django.settings import DEBUG
 
 
-def to_news(r):
+def to_news(_):
     return redirect('/news/')
 
 
@@ -32,6 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('news/', include('news.urls')),
     path('auth/', include('authorize.urls')),
+    path('profile/', include('user_profile.urls')),
     path('', to_news),
 ]
 

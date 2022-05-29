@@ -24,8 +24,6 @@ from news_django.settings import env, DOMAIN_NAME, EMAIL_HOST_USER, DEBUG
 from user_profile.models import ExtendedUser
 
 
-# Create your views here.
-
 def send_email(data) -> int:
     try:
         assert all([data.get('subject'), data.get('message'), EMAIL_HOST_USER, data.get('email_to')])

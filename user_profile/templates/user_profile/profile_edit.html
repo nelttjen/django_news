@@ -1,0 +1,10 @@
+{% extends 'user_profile/profile_base.html' %}
+{% load static %}
+{% block profile %}
+    <h2>Изменение профиля</h2>
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary" type="submit">Сохранить</button>
+    </form>
+{% endblock %}

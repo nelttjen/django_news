@@ -7,6 +7,7 @@ import os
 import random
 import string
 
+from django.contrib.auth.decorators import user_passes_test
 from django.db.models import ObjectDoesNotExist
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -82,6 +83,15 @@ def to_login(request):
     return redirect('/auth/login')
 
 
+def to_profile(request):
+    return redirect('/profile')
+
+
+def no_login(user: User):
+    return not user.is_authenticated
+
+
+@user_passes_test(no_login, login_url='/auth/to_profile')
 def def_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -121,6 +131,7 @@ def def_login(request):
     return render(request, 'authorize/login.html', context=data)
 
 
+@user_passes_test(no_login, login_url='/auth/to_profile')
 def def_register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)

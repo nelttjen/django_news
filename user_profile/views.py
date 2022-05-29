@@ -2,11 +2,13 @@ import os.path
 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
 from django.db.models import ObjectDoesNotExist
 from django.contrib import messages
+from django.http import HttpResponseRedirect as redirect
 
 from .models import ExtendedUser
-from .forms import ImageForm, UserInfoForm, MAX_FILESIZE
+from .forms import ImageForm, UserInfoForm, ChangePasswordForm, MAX_FILESIZE
 
 
 def get_extended_user(user):
@@ -67,6 +69,39 @@ def profile_user_info(request):
     }
     return render(request, 'user_profile/profile_edit.html', context=data)
 
+
 @login_required
 def profile_user_password(request):
-    pass
+    if request.method == 'POST':
+        form = ChangePasswordForm(request.POST)
+        if form.is_valid():
+            user = request.user
+            code = form.check(user)
+            if code == ChangePasswordForm.OK:
+                form.set(request.user)
+                messages.success(request, 'Пароль изменен')
+                login(request, user)
+                return redirect('/profile/change_password')
+            elif code == ChangePasswordForm.OLD:
+                messages.error(request, 'Неправильный пароль')
+            elif code == ChangePasswordForm.SAME:
+                messages.error(request, 'Пароль не может совпадать с текущим')
+            elif code == ChangePasswordForm.NOT_EQUALS:
+                messages.error(request, 'Пароли не совпадают')
+            elif code == ChangePasswordForm.STRONG:
+                messages.error(request, 'В новом пароле должна быть хотя бы 1 заглавная и строчная буква, и 1 цифра')
+            elif code == ChangePasswordForm.SYMBOLS:
+                messages.error(request, 'Пароль может содержать только буквы латинского алфавита и символы $%#_-+=!@')
+            elif code == ChangePasswordForm.MIN_MAX:
+                messages.error(request, f'Пароль должен быть от {ChangePasswordForm.PASS_MIN} '
+                                        f'до {ChangePasswordForm.PASS_MAX} символов')
+            elif code == ChangePasswordForm.LOG_PASS:
+                messages.error(request, 'Пароль не может совпадать с логином')
+    else:
+        form = ChangePasswordForm()
+    data = {
+        'form': form,
+    }
+    return render(request, 'user_profile/profile_password.html', context=data)
+
+

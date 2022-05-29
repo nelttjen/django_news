@@ -1,9 +1,13 @@
+import string
+
 from django import forms
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import check_password
 from django.core.files.uploadedfile import UploadedFile
 
 from news_django.settings import MAX_FILESIZE
 from user_profile.models import ExtendedUser
+from authorize.views import strong_check
 
 
 class ImageForm(forms.Form):
@@ -29,20 +33,75 @@ class ImageForm(forms.Form):
 class UserInfoForm(forms.Form):
     city = forms.CharField(label='Город', required=False,
                            widget=forms.TextInput(attrs={'class': 'form-control',
-                                                         'text-hint': 'Введите город'}))
+                                                         'placeholder': 'Введите город'}))
     company = forms.CharField(label='Компания', required=False,
                               widget=forms.TextInput(attrs={'class': 'form-control',
-                                                            'text-hint': 'Название компании'}))
+                                                            'placeholder': 'Название компании'}))
     website = forms.CharField(label='Сайт', required=False,
                               widget=forms.TextInput(attrs={'class': 'form-control',
-                                                            'text-hint': 'Ваш сайт'}))
+                                                            'placeholder': 'Ваш сайт'}))
     mobile = forms.CharField(label='Телефон', required=False,
                              widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'tel',
                                                            'pattern': '[+]{1}[0-9]{11,14}',
-                                                           'text-hint': 'Введите номер телефона'}))
+                                                           'placeholder': 'Введите номер телефона'}))
 
     # def from_user(self, user: ExtendedUser):
     #     self.city.initial = user.city
     #     self.company.initial = user.company
     #     self.website.initial = user.websites
     #     self.mobile.initial = user.mobile
+
+
+class ChangePasswordForm(forms.Form):
+    OLD = 1
+    SAME = 2
+    STRONG = 3
+    NOT_EQUALS = 4
+    MIN_MAX = 5
+    SYMBOLS = 6
+    LOG_PASS = 7
+    OK = 0
+
+    PASS_MIN = 8
+    PASS_MAX = 50
+
+    INPUT_TYPE = 'text'
+
+    old_pass = forms.CharField(label='Текущий пароль',
+                               widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'password',
+                                                             'placeholder': 'Текущий пароль'}))
+    new_pass1 = forms.CharField(label='Новый пароль',
+                                widget=forms.TextInput(attrs={'class': 'form-control', 'type': INPUT_TYPE,
+                                                              'placeholder': 'Новый пароль'}))
+    new_pass2 = forms.CharField(label='Повторите пароль',
+                                widget=forms.TextInput(attrs={'class': 'form-control', 'type': INPUT_TYPE,
+                                                              'placeholder': 'Поторите пароль'}))
+
+    def check(self, user: User) -> int:
+        c_data = self.cleaned_data
+        o_pass = c_data.get('old_pass')
+        pass1 = c_data.get('new_pass1')
+        pass2 = c_data.get('new_pass2')
+
+        allow_pass = string.ascii_letters + string.digits + '$%#_-+=!@'
+
+        if not self.PASS_MIN <= len(pass1) <= self.PASS_MAX:
+            return self.MIN_MAX
+        elif pass1 != pass2:
+            return self.NOT_EQUALS
+        elif pass1 == user.username:
+            return self.LOG_PASS
+        elif not all([i in allow_pass for i in pass1]):
+            return self.SYMBOLS
+        elif not strong_check(pass1):
+            return self.STRONG
+        elif not check_password(o_pass, user.password):
+            return self.OLD
+        elif pass1 == o_pass:
+            return self.SAME
+        return self.OK
+
+    def set(self, user: User):
+        # test: ZXCZXCzxc123
+        user.set_password(self.cleaned_data.get('new_pass1'))
+        user.save()

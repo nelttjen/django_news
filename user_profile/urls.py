@@ -8,6 +8,7 @@ urlpatterns = [
     path('', def_profile, name='home'),
     path('edit/', profile_user_info, name='edit'),
     path('change_password/', profile_user_password, name='change-password')
+
 ]
 
 if DEBUG:

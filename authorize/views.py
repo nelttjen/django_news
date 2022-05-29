@@ -79,6 +79,19 @@ def activate(request, key):
     return HttpResponse('Invalid activation code or link has expired')
 
 
+def strong_check(password):
+    dig, let, big_let = [False] * 3
+    for i in password:
+        if all([dig, let, big_let]):
+            break
+        if i in string.ascii_lowercase:
+            let = True
+        elif i in string.ascii_uppercase:
+            big_let = True
+        elif i in string.digits:
+            dig = True
+    return all([dig, let, big_let])
+
 def to_login(request):
     return redirect('/auth/login')
 
@@ -139,19 +152,6 @@ def def_register(request):
             data = form.cleaned_data
             allow_nick = string.ascii_letters + string.digits + '_'
             allow_pass = string.ascii_letters + string.digits + '$%#_-+=!@'
-
-            def strong_check(password):
-                dig, let, big_let = [False] * 3
-                for i in password:
-                    if all([dig, let, big_let]):
-                        break
-                    if i in string.ascii_lowercase:
-                        let = True
-                    elif i in string.ascii_uppercase:
-                        big_let = True
-                    elif i in string.digits:
-                        dig = True
-                return all([dig, let, big_let])
 
             if not 4 <= len(data.get('login')) <= 32:
                 messages.error(request, 'Длинна логина должна быть от 4 до 32 символов')

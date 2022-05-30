@@ -28,6 +28,10 @@ body {
     left: 0;
 }
 
+.footer-offset {
+    height: 100px;
+}
+
 .container {
     margin-top: 20px;
 }
@@ -55,3 +59,4 @@ body {
 .messages li.error {
     color: crimson;
 }
+

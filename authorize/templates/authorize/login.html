@@ -8,7 +8,6 @@
     <div class="login-form">
         <h1>Авторизация</h1>
         {% include "include/messages.html" %}
-        user_auth: {{ user.is_authenticated }}
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <p>
@@ -24,6 +23,7 @@
                 <label for="remember" class="form-label" style="cursor: pointer; user-select: none;">{{form.remember.label}}</label>
             </p>
             <p>Нет аккаунта? <a href="/auth/register">Зарегестрироваться</a></p>
+            <a href="/auth/forgot">Восстановить пароль</a>
             <button type="submit" class="btn btn-primary">Войти</button>
         </form>
     </div>

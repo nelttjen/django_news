@@ -1,0 +1,26 @@
+{% extends 'user_profile/profile_base.html' %}
+{% load static %}
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'user_profile/css/profile.css' %}?{{ reload }}">
+{% endblock %}
+{% block profile %}
+    <div class="upload mt-4 border p-3">
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn btn-primary" type="submit">Отправить</button>
+        </form>
+    </div>
+    <div class="profile-info mt-3 border p-3">
+        <h3>Информация о пользователе: </h3>
+        <p>Город:{% if e_user.city %} {{ e_user.city }} {% else %} Не выбран {% endif %}</p>
+        <p>Компания:{% if e_user.company %} {{ e_user.company }} {% else %} Нет {% endif %}</p>
+        <p>Сайт:{% if e_user.websites %} {{ e_user.websites }} {% else %} Нет {% endif %}</p>
+        <p>Телефон:{% if e_user.mobile %} {{ e_user.mobile }} {% else %} Нет {% endif %}</p>
+        <a href="/profile/edit/">Изменить</a>
+    </div>
+    <div class="password">
+        <a href="/profile/change_password">Изменить пароль</a>
+    </div>
+{% endblock %}

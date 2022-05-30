@@ -8,6 +8,9 @@ urlpatterns = [
     path('register/', def_register, name='register'),
     path('logout/', logout_user, name='logout'),
     path('activate/<str:key>/', activate, name='activate'),
+    path('forgot/', forgot_password, name='forgot'),
+    path('reset/', reset_password, name='reset'),
+
 
     path('to_profile/', to_profile, name='to_profile'),
     path('', to_login, name='home'),

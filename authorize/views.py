@@ -8,7 +8,7 @@ import random
 import string
 
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import ObjectDoesNotExist
+from django.db.models import ObjectDoesNotExist, Q
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -19,10 +19,20 @@ from django.db.utils import IntegrityError
 from django.core.mail import send_mail
 from django.utils import timezone
 
-from .forms import *
-from .models import ActivatedUser
+from .forms import RegisterForm, LoginForm, ForgotForm, ResetForm
+from .models import ActivatedUser, ResetPasswordCode
 from news_django.settings import env, DOMAIN_NAME, EMAIL_HOST_USER, DEBUG, SESSION_EXPIRY
 from user_profile.models import ExtendedUser
+
+
+# initial values
+NICK_SYMBOLS = '_'
+PASS_SYMBOLS = '$%#_-+=!@'
+
+LOGIN_MIN = 4
+LOGIN_MAX = 32
+PASS_MIN = 8
+PASS_MAX = 50
 
 
 # not view defs
@@ -40,10 +50,14 @@ def send_email(data) -> int:
         return 0
 
 
-def create_code(user, deactivate_user: bool = True) -> bool:
-    code = hashlib.md5((timezone.now().__str__() +
-                        user.username +
+def md5code(username=''):
+    return hashlib.md5((timezone.now().__str__() +
+                        username +
                         str(random.randint(0, 999999))).encode())
+
+
+def create_code(user, deactivate_user: bool = True) -> bool:
+    code = md5code(user.username)
     a_user = ActivatedUser.objects.create(
         user=user,
         activated=False,
@@ -64,6 +78,20 @@ def create_code(user, deactivate_user: bool = True) -> bool:
         a_user.activated = True
         a_user.save()
     return True
+
+
+def create_reset_code(user: User):
+    already = ResetPasswordCode.objects.filter(Q(user=user) & Q(activated=False)).first()
+    if already:
+        if already.valid_until > timezone.now():
+            return None
+        else:
+            already.delete()
+    return ResetPasswordCode.objects.create(
+        code=md5code(user.username).hexdigest(),
+        activated=False,
+        user=user,
+    )
 
 
 def strong_check(password) -> bool:
@@ -105,16 +133,28 @@ def create_new_user(data) -> User:
     return _new
 
 
+def password_test(request, password, username='', _min=PASS_MIN, _max=PASS_MAX, _symbols=PASS_SYMBOLS, send_messages=True):
+    allow_pass = string.ascii_letters + string.digits + _symbols
+    if not _min <= len(password) <= _max:
+        messages.error(request, f'Пароль должен быть от {_min} до {_max} символов') if send_messages else None
+        return False
+    elif not all([i in allow_pass for i in password]):
+        _format = lambda: f"и символы: {_symbols}" if _symbols else ''
+        messages.error(request, f'''Пароль может содержать только буквы '''
+                                f'''латинского алфавита {_format()}''') if send_messages else None
+        return False
+    elif password == username:
+        messages.error(request, 'Логин и пароль не должны совпадать') if send_messages else None
+        return False
+    elif not strong_check(password):
+        messages.error(request, 'Пароль должен содержать '
+                                'хотя бы одну заглавную и строчную букву и одну цифру') if send_messages else None
+        return False
+    return True
+
 def register_test(request, data) -> bool:
-    allow_nick = string.ascii_letters + string.digits + '_'
 
-    pass_symbols = '$%#_-+=!@'
-    allow_pass = string.ascii_letters + string.digits + pass_symbols
-
-    LOGIN_MIN = 4
-    LOGIN_MAX = 32
-    PASS_MIN = 8
-    PASS_MAX = 50
+    allow_nick = string.ascii_letters + string.digits + NICK_SYMBOLS
 
     _login = data.get('login')
     _pass1 = data.get('pass1')
@@ -123,30 +163,17 @@ def register_test(request, data) -> bool:
     if not LOGIN_MIN <= len(_login) <= LOGIN_MAX:
         messages.error(request, f'Длинна логина должна быть от {LOGIN_MIN} до {LOGIN_MAX} символов')
         return False
-    elif not PASS_MIN <= len(_pass1) <= PASS_MAX:
-        messages.error(request, f'Пароль должен быть от {PASS_MIN} до {PASS_MAX} символов')
-        return False
     elif not all([i in allow_nick for i in _login]):
-        messages.error(request, 'Логин может содержать только буквы латинского алфавита и символ подчеркивания')
-        return False
-    elif not all([i in allow_pass for i in _pass1]):
-        messages.error(request, f'Пароль может содержать только буквы латинского алфавита и символы {pass_symbols}')
-        return False
-    elif _login == _pass1:
-        messages.error(request, 'Логин и пароль не должны совпадать')
+        messages.error(request, f'Логин может содержать только буквы латинского алфавита и символы: {NICK_SYMBOLS}')
         return False
     elif _pass1 != _pass2:
         messages.error(request, 'Пароли не совпадают')
         return False
-    elif not strong_check(_pass1):
-        messages.error(request, 'Пароль должен содержать хотя бы одну заглавную и строчную букву и одну цифру')
-        return False
-    return True
+    return password_test(request, _pass1, _login)
+
 
 # view defs
 # no_login will restrict access to already signed up users
-
-
 @user_passes_test(no_login, login_url='/auth/to_profile')
 def def_login(request):
     if request.method == 'POST':
@@ -243,12 +270,56 @@ def activate(request, key):
 
 @user_passes_test(no_login, login_url='/auth/to_profile')
 def forgot_password(request):
-    pass
+    if request.method == 'POST':
+        form = ForgotForm(request.POST)
+        if form.is_valid():
+            user = form.check_login()
+            msg = False
+            if user:
+                code = create_reset_code(user)
+                if code:
+                    data = {
+                        'subject': 'Восстановление пароля',
+                        'message': f'Ваша ссылка для восстановления пароля: '
+                                   f'{DOMAIN_NAME}/auth/reset?key={code.code}\n'
+                                   f'Ссылка действительна в течении 30 минут',
+                        'email_to': [user.email]
+                    }
+                    send_email(data)
+                else:
+                    messages.info(request, f'На ваш email уже был отправлен код для восстановления пароля')
+                    msg = True
+            if not msg:
+                messages.info(request, f'На email, указанный при регистрации было отправленно письмо '
+                                       f'с ссылкой для восстановления аккаунта. Если вы не получили письмо, '
+                                       f'возможно пользователя не существует или он был заблокирован')
+    else:
+        form = ForgotForm()
+    return render(request, 'authorize/forgot.html', context={'form': form})
 
 
 @user_passes_test(no_login, login_url='/auth/to_profile')
 def reset_password(request):
-    pass
+    form = ResetForm()
+    key = request.GET.get('key')
+    if request.method == 'POST':
+        form = ResetForm(request.POST)
+        if form.is_valid():
+            if not form.check(key):
+                messages.error(request, 'invalid code')
+                return redirect('/auth/login')
+            f_data = form.cleaned_data
+            user = form.get_user(key)
+            if not form.check_same():
+                messages.error(request, 'Пароли не совпадают')
+            elif password_test(request, f_data.get('pass1'), user.username):
+                form.set_password(key, user)
+                messages.success(request, 'Пароль изменен. Теперь вы можете войти в аккаунт с новым паролем')
+                return redirect('/auth/login')
+    elif request.method == 'GET':
+        if not form.check(key):
+            form = None
+    return render(request, 'authorize/reset.html', context={'form': form})
 
 
 def logout_user(request):

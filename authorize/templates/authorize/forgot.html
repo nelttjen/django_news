@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+    <title>Reset</title>
+    <link rel="stylesheet" href="{% static "authorize/css/forgot.css" %}?{{ reload }}">
+{% endblock %}
+{% block container %}
+    <div class="forgot">
+        <h2>Восстановление пароля</h2>
+        {% include 'include/messages.html' %}
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Отправить код подтверждения</button>
+        </form>
+        <p class="mt-3">Я вспомнил пароль! <a href="/auth/login">Войти</a></p>
+    </div>
+{% endblock %}

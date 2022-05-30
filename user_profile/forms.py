@@ -9,6 +9,9 @@ from news_django.settings import MAX_FILESIZE
 from user_profile.models import ExtendedUser
 from authorize.views import strong_check
 
+# used for password history
+from authorize.models import PreviousPassword
+
 
 class ImageForm(forms.Form):
     OK = 0
@@ -103,5 +106,14 @@ class ChangePasswordForm(forms.Form):
 
     def set(self, user: User):
         # test: ZXCZXCzxc123
+
+        # Non-profile action!
+        PreviousPassword.objects.create(
+            user=user,
+            password=user.password,
+        )
+
         user.set_password(self.cleaned_data.get('new_pass1'))
         user.save()
+
+

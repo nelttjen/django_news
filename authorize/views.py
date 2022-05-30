@@ -306,7 +306,7 @@ def reset_password(request):
         form = ResetForm(request.POST)
         if form.is_valid():
             if not form.check(key):
-                messages.error(request, 'invalid code')
+                messages.error(request, 'Что-то пошло не так. Возможно истек срок дейстия кода или он не существует')
                 return redirect('/auth/login')
             f_data = form.cleaned_data
             user = form.get_user(key)

@@ -83,7 +83,7 @@ def create_code(user, deactivate_user: bool = True) -> bool:
 def create_reset_code(user: User):
     already = ResetPasswordCode.objects.filter(Q(user=user) & Q(activated=False)).first()
     if already:
-        if already.valid_until > timezone.now():
+        if already.code_valid_until > timezone.now():
             return None
         else:
             already.delete()
@@ -256,7 +256,7 @@ def def_register(request):
 def activate(request, key):
     a_user = ActivatedUser.objects.filter(verification_code=key).first()
     if a_user and not a_user.activated:
-        if not timezone.now() < a_user.valid_until:
+        if not timezone.now() < a_user.code_valid_until:
             user = a_user.user
             a_user.delete()
             create_code(user)

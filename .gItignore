@@ -160,6 +160,7 @@ cython_debug/
 .idea/
 
 #project
+.vscode
 static/admin
 static/authorize
 static/news

@@ -39,7 +39,8 @@ class ResetForm(forms.Form):
     pass2 = forms.CharField(label='Повторите пароль', widget=forms.TextInput(
         attrs={'class': 'form-control', 'type': 'password'}))
 
-    def check(self, key):
+    @classmethod
+    def check(cls, key):
         db_code = ResetPasswordCode.objects.filter(Q(code=key) & Q(activated=False)).first()
         if db_code:
             if db_code.valid_until > timezone.now():
@@ -48,7 +49,8 @@ class ResetForm(forms.Form):
                 db_code.delete()
         return False
 
-    def get_user(self, key):
+    @classmethod
+    def get_user(cls, key):
         return ResetPasswordCode.objects.filter(code=key).first().user
 
     def check_same(self):
@@ -68,3 +70,11 @@ class ResetForm(forms.Form):
         # update user password
         user.password = make_password(self.cleaned_data.get('pass1'))
         user.save()
+
+
+class TempbanForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+
+    until = forms.DateTimeField(label='Блокировать до', widget=forms.SelectDateWidget)
+    message = forms.CharField(label='Сообщение для блокировки', required=False,
+                              widget=forms.Textarea(attrs={'class': 'form-control'}))

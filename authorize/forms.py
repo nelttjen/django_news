@@ -70,3 +70,11 @@ class ResetForm(forms.Form):
         # update user password
         user.password = make_password(self.cleaned_data.get('pass1'))
         user.save()
+
+
+class TempbanForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+
+    until = forms.DateTimeField(label='Блокировать до', widget=forms.SelectDateWidget)
+    message = forms.CharField(label='Сообщение для блокировки', required=False,
+                              widget=forms.Textarea(attrs={'class': 'form-control'}))

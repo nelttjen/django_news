@@ -24,7 +24,6 @@ from .models import ActivatedUser, ResetPasswordCode
 from news_django.settings import env, DOMAIN_NAME, EMAIL_HOST_USER, DEBUG, SESSION_EXPIRY
 from user_profile.models import ExtendedUser
 
-
 # initial values
 NICK_SYMBOLS = '_'
 PASS_SYMBOLS = '$%#_-+=!@'
@@ -133,7 +132,8 @@ def create_new_user(data) -> User:
     return _new
 
 
-def password_test(request, password, username='', _min=PASS_MIN, _max=PASS_MAX, _symbols=PASS_SYMBOLS, send_messages=True):
+def password_test(request, password, username='', _min=PASS_MIN, _max=PASS_MAX, _symbols=PASS_SYMBOLS,
+                  send_messages=True):
     allow_pass = string.ascii_letters + string.digits + _symbols
     if not _min <= len(password) <= _max:
         messages.error(request, f'Пароль должен быть от {_min} до {_max} символов') if send_messages else None
@@ -152,8 +152,8 @@ def password_test(request, password, username='', _min=PASS_MIN, _max=PASS_MAX, 
         return False
     return True
 
-def register_test(request, data) -> bool:
 
+def register_test(request, data) -> bool:
     allow_nick = string.ascii_letters + string.digits + NICK_SYMBOLS
 
     _login = data.get('login')

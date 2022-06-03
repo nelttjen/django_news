@@ -72,9 +72,23 @@ class ResetForm(forms.Form):
         user.save()
 
 
-class TempbanForm(forms.Form):
+class BaseAdminForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
 
-    until = forms.DateTimeField(label='Блокировать до', widget=forms.SelectDateWidget)
+
+class BanAdminForm(BaseAdminForm):
     message = forms.CharField(label='Сообщение для блокировки', required=False,
                               widget=forms.Textarea(attrs={'class': 'form-control'}))
+
+
+class TempbanAdminForm(BanAdminForm):
+    until = forms.DateTimeField(label='Блокировать до', widget=forms.SelectDateWidget)
+
+
+class PasswordChangeAdminForm(BaseAdminForm):
+    pass1 = forms.CharField(label='Пароль',
+                            widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'password'}))
+    pass2 = forms.CharField(label='Повторите пароль',
+                            widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'password'}))
+
+

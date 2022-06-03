@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import UploadedFile
 
 from news_django.settings import MAX_FILESIZE
 from user_profile.models import ExtendedUser
-from authorize.views import strong_check
+from authorize.checks import PasswordStrongCheck
 
 # used for password history
 from authorize.models import PreviousPassword
@@ -96,7 +96,7 @@ class ChangePasswordForm(forms.Form):
             return self.LOG_PASS
         elif not all([i in allow_pass for i in pass1]):
             return self.SYMBOLS
-        elif not strong_check(pass1):
+        elif not PasswordStrongCheck.strong_check(pass1):
             return self.STRONG
         elif not check_password(o_pass, user.password):
             return self.OLD

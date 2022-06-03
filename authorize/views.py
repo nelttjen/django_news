@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-import asyncio
-import datetime
 import hashlib
-import os
 import random
 import string
 
@@ -21,17 +18,15 @@ from django.utils import timezone
 
 from .forms import RegisterForm, LoginForm, ForgotForm, ResetForm
 from .models import ActivatedUser, ResetPasswordCode
+from .checks import LoginAbility, PasswordStrongCheck
 from news_django.settings import env, DOMAIN_NAME, EMAIL_HOST_USER, DEBUG, SESSION_EXPIRY
 from user_profile.models import ExtendedUser
 
 # initial values
 NICK_SYMBOLS = '_'
-PASS_SYMBOLS = '$%#_-+=!@'
 
 LOGIN_MIN = 4
 LOGIN_MAX = 32
-PASS_MIN = 8
-PASS_MAX = 50
 
 
 # not view defs
@@ -93,20 +88,6 @@ def create_reset_code(user: User):
     )
 
 
-def strong_check(password) -> bool:
-    dig, let, big_let = [False] * 3
-    for i in password:
-        if all([dig, let, big_let]):
-            break
-        if i in string.ascii_lowercase:
-            let = True
-        elif i in string.ascii_uppercase:
-            big_let = True
-        elif i in string.digits:
-            dig = True
-    return all([dig, let, big_let])
-
-
 def to_login(request):
     return redirect('/auth/login')
 
@@ -132,27 +113,6 @@ def create_new_user(data) -> User:
     return _new
 
 
-def password_test(request, password, username='', _min=PASS_MIN, _max=PASS_MAX, _symbols=PASS_SYMBOLS,
-                  send_messages=True):
-    allow_pass = string.ascii_letters + string.digits + _symbols
-    if not _min <= len(password) <= _max:
-        messages.error(request, f'Пароль должен быть от {_min} до {_max} символов') if send_messages else None
-        return False
-    elif not all([i in allow_pass for i in password]):
-        _format = lambda: f"и символы: {_symbols}" if _symbols else ''
-        messages.error(request, f'''Пароль может содержать только буквы '''
-                                f'''латинского алфавита {_format()}''') if send_messages else None
-        return False
-    elif password == username:
-        messages.error(request, 'Логин и пароль не должны совпадать') if send_messages else None
-        return False
-    elif not strong_check(password):
-        messages.error(request, 'Пароль должен содержать '
-                                'хотя бы одну заглавную и строчную букву и одну цифру') if send_messages else None
-        return False
-    return True
-
-
 def register_test(request, data) -> bool:
     allow_nick = string.ascii_letters + string.digits + NICK_SYMBOLS
 
@@ -169,7 +129,7 @@ def register_test(request, data) -> bool:
     elif _pass1 != _pass2:
         messages.error(request, 'Пароли не совпадают')
         return False
-    return password_test(request, _pass1, _login)
+    return PasswordStrongCheck.password_test(request, _pass1, _login)
 
 
 # view defs
@@ -197,11 +157,13 @@ def def_login(request):
                     # so we need to login it next step as well
                     activated = user.is_superuser
                 if activated:
-                    login(request, user)
+                    # Need to check for any bans
+                    if LoginAbility.check_user(request, user.activateduser) != LoginAbility.OK:
+                        return redirect('/auth/login')
 
+                    login(request, user)
                     if not data.get('remember'):
                         request.session.set_expiry(SESSION_EXPIRY)
-
                     messages.success(request, 'Вы вошли в аккаунт')
                     return redirect('/profile')
                 else:
@@ -312,7 +274,7 @@ def reset_password(request):
             user = form.get_user(key)
             if not form.check_same():
                 messages.error(request, 'Пароли не совпадают')
-            elif password_test(request, f_data.get('pass1'), user.username):
+            elif PasswordStrongCheck.password_test(request, f_data.get('pass1'), user.username):
                 form.set_password(key, user)
                 messages.success(request, 'Пароль изменен. Теперь вы можете войти в аккаунт с новым паролем')
                 return redirect('/auth/login')

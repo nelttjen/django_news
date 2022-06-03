@@ -22,8 +22,8 @@ class LoginAbility(object):
                 if send_messages:
                     date = user.banned_until.strftime('%d.%m.%Y')
                     time = user.banned_until.strftime('%H:%M:%S')
-                    _f = lambda: f' администратором {user.banned_by_username}' if user.banned_by_username else ''
-                    messages.error(request, f'Ваш аккаунт временно заблокирован{_f()}!')
+                    _f = f' администратором {user.banned_by_username}' if user.banned_by_username else ''
+                    messages.error(request, f'Ваш аккаунт временно заблокирован{_f}!')
 
                     messages.error(request, f'Вы не можете войти в систему до')
                     messages.error(request, f'{date} {time} {timezone.get_current_timezone()}')
@@ -41,8 +41,8 @@ class LoginAbility(object):
                 user.save()
         if user.is_permanent_banned:
             if send_messages:
-                _f = lambda: f' администратором {user.banned_by_username}' if user.banned_by_username else ''
-                messages.error(request, f'Ваш аккаунт перманентно заблокирован{_f()}!')
+                _f = f' администратором {user.banned_by_username}' if user.banned_by_username else ''
+                messages.error(request, f'Ваш аккаунт перманентно заблокирован{_f}!')
                 messages.error(request, 'Вы больше не сможете войти в систему')
                 if user.banned_message:
                     messages.error(request, f'Сообщение администратора:')
@@ -93,8 +93,8 @@ class PasswordStrongCheck(object):
             return False
         elif not all([i in allow_pass for i in password]):
             if send_messages:
-                _format = lambda: f"и символы: {_symbols}" if _symbols else ''
-                message = f'''Пароль может содержать только буквы латинского алфавита {_format()}'''
+                _format = f"и символы: {_symbols}" if _symbols else ''
+                message = f'''Пароль может содержать только буквы латинского алфавита {_format}'''
                 send(message)
             return False
         elif password == username:

@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.contrib.auth.models import User, Permission
 from django.utils import timezone
 from django.http import HttpResponseRedirect as redirect
 from django.shortcuts import render
@@ -88,6 +89,7 @@ def permanent_ban(modeladmin, request, queryset):
                 msg = form.cleaned_data.get('message')
                 if msg:
                     obj.banned_message = msg
+                LoginAbility.logout_user(obj.user)
                 obj.save()
             _f = 'пользователю' if len(queryset) == 1 else 'пользователям'
             modeladmin.message_user(request, f'Блокировка применена к {len(queryset)} {_f}')
@@ -159,7 +161,14 @@ def change_password(modeladmin, request, queryset):
 
 
 class UserAdmin(admin.ModelAdmin):
-    pass
+
+    def nothing(self, request, queryset):
+        pass
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    actions = [nothing]
 
 
 class ActivatedUserAdmin(admin.ModelAdmin):
@@ -174,6 +183,11 @@ class ActivatedUserAdmin(admin.ModelAdmin):
     actions = (activate_users, deactivate_users, update_activated_date, change_password,
                tempban, permanent_ban, unban_tempban, unban_permanent)
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 admin.site.register(ActivatedUser, ActivatedUserAdmin)
-admin.site.disable_action('delete_selected')
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+admin.site.register(Permission)

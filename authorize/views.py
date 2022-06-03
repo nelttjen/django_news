@@ -224,6 +224,7 @@ def activate(request, key):
             create_code(user)
             return HttpResponse('link expired. new link was sent to your email')
         a_user.activated = True
+        a_user.activated_on = timezone.now()
         a_user.save()
         messages.success(request, 'account activated. Now you can log in into your account')
         return redirect('/auth/login')

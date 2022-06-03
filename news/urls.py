@@ -10,5 +10,6 @@ urlpatterns = [
 
 if DEBUG:
     urlpatterns = [
-
+        path('snow/', show, name='show'),
+        path('date/', time)
     ] + urlpatterns

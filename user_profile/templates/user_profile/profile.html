@@ -16,7 +16,7 @@
         <h3>Информация о пользователе: </h3>
         <p>Город:{% if e_user.city %} {{ e_user.city }} {% else %} Не выбран {% endif %}</p>
         <p>Компания:{% if e_user.company %} {{ e_user.company }} {% else %} Нет {% endif %}</p>
-        <p>Сайт:{% if e_user.websites %} {{ e_user.websites }} {% else %} Нет {% endif %}</p>
+        <p>Сайт:{% if e_user.websites %} <a href="{{ e_user.websites }}">{{ e_user.websites }}</a> {% else %} Нет {% endif %}</p>
         <p>Телефон:{% if e_user.mobile %} {{ e_user.mobile }} {% else %} Нет {% endif %}</p>
         <a href="/profile/edit/">Изменить</a>
     </div>

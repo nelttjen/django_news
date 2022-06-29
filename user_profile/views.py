@@ -6,9 +6,14 @@ from django.contrib.auth import login
 from django.db.models import ObjectDoesNotExist
 from django.contrib import messages
 from django.http import HttpResponseRedirect as redirect
+from django.http import HttpResponse
 
 from .models import ExtendedUser
 from .forms import ImageForm, UserInfoForm, ChangePasswordForm, MAX_FILESIZE
+
+
+def has_image(r):
+    return os.path.exists(f'user_profile/static/user_profile/img/profile_images/{r.user.id}.png')
 
 
 def get_extended_user(user):
@@ -36,7 +41,7 @@ def def_profile(request):
         form = ImageForm()
     e_user = get_extended_user(request.user)
     data = {
-        'has_image': os.path.exists(f'user_profile/static/user_profile/img/profile_images/{request.user.id}.png'),
+        'has_image': has_image(request),
         'e_user': e_user,
         'form': form,
     }
@@ -64,6 +69,7 @@ def profile_user_info(request):
             'mobile': e_user.mobile,
         })
     data = {
+        'has_image': has_image(request),
         'e_user': e_user,
         'form': form,
     }
@@ -100,8 +106,7 @@ def profile_user_password(request):
     else:
         form = ChangePasswordForm()
     data = {
+        'has_image': has_image(request),
         'form': form,
     }
     return render(request, 'user_profile/profile_password.html', context=data)
-
-

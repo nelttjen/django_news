@@ -153,9 +153,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD', default='')
 
+MEDIA_ROOT = 'uploads/'
 MAX_FILESIZE = 16 * 1024 * 1024
 
 # login remember time
-
 # SESSION_EXPIRY = 2 * 7 * 24 * 3600  # 2 weeks
 SESSION_EXPIRY = 1800  # 30 mins

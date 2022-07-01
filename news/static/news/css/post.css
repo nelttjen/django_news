@@ -1,0 +1,26 @@
+.tag_checkbox {
+    user-select: none;
+}
+.tag_checkbox div label {
+    cursor: pointer;
+}
+
+#id_categories {
+    display: flex;
+    gap: 15px;
+}
+
+.size_formatter {
+    margin-left: 25px;
+    border: none;
+}
+
+.size_formatter:before {
+    width: 25px;
+    height: 25px;
+    content: "> ";
+}
+
+.size_formatter.clicked:before {
+    content: "< " !important;
+}

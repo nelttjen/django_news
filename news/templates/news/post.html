@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+    <title>New Post</title>
+    <link rel="stylesheet" href="{% static "news/css/post.css" %}?{{ reload }}">
+    <script src="{% static "news/js/post.js" %}?{{reload}}"></script>
+{% endblock %}
+{% block container %}
+    <div class="new_post">
+        {% if not edit_mode %}
+        <h2>Добавить новость</h2>
+        {% else %}
+        <h2>Изменить новость</h2>
+        {% endif %}
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="options">
+                {% if not edit_mode %}
+                <button type="submit" value="save" class="btn btn-primary">Сохранить как черновик</button>
+                {% else %}
+                <button type="submit" value="delete" class="btn btn-danger">Удалить новость</button>
+                {% endif %}
+                <button type="submit" value="post" class="btn btn-success">Отпубликовать новость</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

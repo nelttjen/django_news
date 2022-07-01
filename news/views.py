@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils import timezone
 
+from .forms import PostForm
+
 
 # debug stuff
 def test(request):
@@ -22,10 +24,12 @@ def index(request):
 
 
 def new_post(request):
+    form = PostForm()
+
     if request.method == 'POST':
-        pass
+        form = PostForm(request.POST)
 
     data = {
-
+        'form': form,
     }
-    return render(request, 'news/new_post.html', context=data)
+    return render(request, 'news/post.html', context=data)

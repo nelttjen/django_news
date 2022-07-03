@@ -19,5 +19,5 @@ urlpatterns = [
 
 if DEBUG:
     urlpatterns = [
-
+        path('debug/', test_func, name='debug')
     ] + urlpatterns

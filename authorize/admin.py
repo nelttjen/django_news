@@ -168,6 +168,9 @@ class UserAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    def has_add_permission(self, request):
+        return False
+
     actions = [nothing]
 
 
@@ -182,6 +185,9 @@ class ActivatedUserAdmin(admin.ModelAdmin):
 
     actions = (activate_users, deactivate_users, update_activated_date, change_password,
                tempban, permanent_ban, unban_tempban, unban_permanent)
+
+    def has_add_permission(self, request):
+        return False
 
     def has_delete_permission(self, request, obj=None):
         return False

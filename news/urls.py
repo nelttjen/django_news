@@ -6,6 +6,7 @@ from .views import *
 urlpatterns = [
     path('', index),
     path('test/', test),
+    path('new_post/', new_post)
 ]
 
 if DEBUG:

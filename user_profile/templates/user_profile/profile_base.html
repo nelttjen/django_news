@@ -17,13 +17,16 @@
                 <img class="profile-icon" src="{% static 'user_profile/img/default.png' %}" alt="">
                 {% endif %}
             </div>
+            {% block profile_head %}
+            {% endblock %}
         </div>
         <div class="profile-body">
             {% block profile %}
             {% endblock %}
         </div>
-        <div class="profile-end">
-            <a class="btn btn-danger mt-5" href="/auth/logout/" style="text-decoration: none">Выйти</a>
+        <div class="profile-end mt-5">
+            {% block profile_end %}
+            {% endblock %}
         </div>
     </div>
 {% endblock %}

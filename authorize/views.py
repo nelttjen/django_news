@@ -133,6 +133,13 @@ def register_test(request, data) -> bool:
 
 
 # view defs
+
+def test_func(request):
+    # debug code here
+
+    return HttpResponse('ok')
+
+
 # no_login will restrict access to already signed up users
 @user_passes_test(no_login, login_url='/auth/to_profile')
 def def_login(request):

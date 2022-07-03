@@ -1,3 +1,6 @@
+import os
+from uuid import uuid4
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -6,15 +9,28 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 
+def path_and_rename(instance, filename):
+    upload_to = f'posts/{timezone.now().strftime("%Y/%m/%d/")}'
+    ext = filename.split('.')[-1]
+    # get filename
+    if instance.pk:
+        filename = '{}.{}'.format(instance.pk, ext)
+    else:
+        # set filename as random string
+        filename = '{}.{}'.format(uuid4().hex, ext)
+    # return the whole path to the file
+    return os.path.join(upload_to, filename)
+
+
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
-    image = models.ImageField(upload_to='posts/%Y/%m/%d/', blank=True, null=True)
+    image = models.ImageField(upload_to=path_and_rename, blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    creation_date = models.DateField(default=timezone.now)
-    last_edit_time = models.DateTimeField(default=timezone.now)
+    creation_date = models.DateField(auto_now=True)
+    last_edit_time = models.DateTimeField(auto_now=True)
     is_posted = models.BooleanField(default=False)
-    tags = models.ManyToManyField('Tag')
+    tags = models.ManyToManyField('Tag', blank=True)
 
     class Meta:
         verbose_name = 'Новость'

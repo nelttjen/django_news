@@ -1,0 +1,26 @@
+.posts-container {
+    width: 1000px;
+    border: 1px solid orange;
+    padding: 25px;
+    margin: auto;
+}
+
+.card-image {
+    max-width: 600px;
+    max-height: 400px;
+    margin: auto;
+}
+
+.card-time {
+    display: flex;
+    justify-content: space-between;
+}
+
+.no-posts {
+    margin: 50px auto;
+    width: fit-content;
+}
+
+.create-new {
+    text-align: center;
+}

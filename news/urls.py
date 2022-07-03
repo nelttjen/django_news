@@ -6,11 +6,12 @@ from .views import *
 urlpatterns = [
     path('', index),
     path('test/', test),
-    path('new_post/', new_post)
+    path('new_post/', new_post),
+    path('my_posts/', my_posts),
 ]
 
 if DEBUG:
     urlpatterns = [
-        path('snow/', show, name='show'),
+        path('show/', show, name='show'),
         path('date/', time)
     ] + urlpatterns

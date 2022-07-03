@@ -39,12 +39,14 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1']
 
 # static urls
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = (
         os.path.join(BASE_DIR, 'authorize\\static'),
         os.path.join(BASE_DIR, 'news\\static'),
         os.path.join(BASE_DIR, 'user_profile\\static'),
-        os.path.join(BASE_DIR, 'static')
+        os.path.join(BASE_DIR, 'static'),
+        os.path.join(BASE_DIR, 'uploads'),
 )
 
 # Application definition
@@ -90,6 +92,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -153,7 +156,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD', default='')
 
-MEDIA_ROOT = 'uploads/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads/')
+MEDIA_URL = '/uploads/'
 MAX_FILESIZE = 16 * 1024 * 1024
 
 # login remember time

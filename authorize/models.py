@@ -34,7 +34,7 @@ class ActivatedUser(models.Model):
 class PreviousPassword(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, unique=False)
 
-    changed_on = models.DateTimeField(default=timezone.now)
+    changed_on = models.DateTimeField(auto_now=True)
     password = models.CharField(max_length=200)
 
 

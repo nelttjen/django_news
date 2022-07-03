@@ -13,11 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponseRedirect as redirect
 
 from news.views import *
+from .settings import MEDIA_URL, MEDIA_ROOT
 
 
 def to_news(_):
@@ -32,4 +34,5 @@ urlpatterns = [
     path('', to_news),
 ]
 
+urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
 

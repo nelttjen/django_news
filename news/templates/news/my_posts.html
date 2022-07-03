@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load tz %}
+{% block head %}
+    <title>My Posts</title>
+    <link rel="stylesheet" href="{% static "news/css/my_posts.css" %}?{{ reload }}">
+{% endblock %}
+{% block container %}
+    <div class="posts-container">
+        <h2 style="text-align: center;">Ваши записи</h2>
+        <div class="create-new">
+            <h3><a href="/news/new_post">Создать новую запись</a></h3>
+        </div>
+        {% include "include/messages.html"%}
+        {% if posts %}
+            {% for post in posts %}
+                <div class="card mb-3">
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" class="card-img-top card-image" alt="No image">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{post.title}}</h5>
+                        <p class="card-text">{{post.content}}</p>
+                        <p>Статус новости: 
+                            {% if not post.is_posted %}
+                            <span style="color: red;">Не отпубликована</span>
+                            {% else %}
+                            <span style="color: green;">Отпубликована</span>
+                            {% endif %}
+                        </p>
+                        <div class="card-time">
+                            <p class="card-text"><small class="text-muted">Дата публикации: {{ post.creation_date }}</small></p>
+                            <p class="card-text"><small class="text-muted">Последнее редактирование: {{ post.last_edit_time|localtime }}</small></p>
+                        </div>
+                        <a href="/news/my_posts/edit/{{post.id}}" class="btn btn-primary" style="text-decoration: none;">Редактировать</a>
+                    </div>
+              </div>
+            {% endfor %}
+        {% else %}
+            <h4 class="no-posts">У вас пока нет ни одной записи. <a href="/news/new_post">Создать</a></h4>
+        {% endif %}
+    </div>
+{% endblock %}

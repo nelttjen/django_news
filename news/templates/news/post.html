@@ -18,11 +18,16 @@
             {{ form.as_p }}
             <div class="options">
                 {% if not edit_mode %}
-                <button type="submit" name="save" value="save" class="btn btn-primary">Сохранить как черновик</button>
+                <button type="submit" name="save" value="save" class="btn btn-secondary">Сохранить как черновик</button>
                 {% else %}
                 <button type="submit" name="delete" value="delete" class="btn btn-danger">Удалить новость</button>
+                <button type="submit" name="update" value="update" class="btn btn-primary">Сохранить изменения</button>
                 {% endif %}
+                {% if not is_posted %}
                 <button type="submit" name="post" value="post" class="btn btn-success">Отпубликовать новость</button>
+                {% else %}
+                <button type="submit" name="hide" value="hide" class="btn btn-secondary">Снять с публикации</button>
+                {% endif %}
             </div>
         </form>
     </div>

@@ -12,16 +12,17 @@
         {% else %}
         <h2>Изменить новость</h2>
         {% endif %}
+        {% include "include/messages.html" %}
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
             <div class="options">
                 {% if not edit_mode %}
-                <button type="submit" value="save" class="btn btn-primary">Сохранить как черновик</button>
+                <button type="submit" name="save" value="save" class="btn btn-primary">Сохранить как черновик</button>
                 {% else %}
-                <button type="submit" value="delete" class="btn btn-danger">Удалить новость</button>
+                <button type="submit" name="delete" value="delete" class="btn btn-danger">Удалить новость</button>
                 {% endif %}
-                <button type="submit" value="post" class="btn btn-success">Отпубликовать новость</button>
+                <button type="submit" name="post" value="post" class="btn btn-success">Отпубликовать новость</button>
             </div>
         </form>
     </div>

@@ -12,5 +12,5 @@ class PostForm(forms.Form):
     image = forms.ImageField(label='Картинка (Необязательно)',
                              widget=forms.FileInput(attrs={'class': 'form-control'}),
                              required=False)
-    categories = forms.ModelMultipleChoiceField(Tag.objects, required=False,
+    categories = forms.ModelMultipleChoiceField(Tag.objects, required=False, label='Выберите категории (Необязательно)',
                                                 widget=forms.CheckboxSelectMultiple(attrs={'class': 'tag_checkbox'}))

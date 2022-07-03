@@ -168,3 +168,4 @@ static/news
 user_profile/static/user_profile/img/default.png
 user_profile/static/user_profile/img/profile_images
 *.bat
+uploads

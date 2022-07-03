@@ -8,6 +8,7 @@
 #id_categories {
     display: flex;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .size_formatter {
@@ -23,4 +24,22 @@
 
 .size_formatter.clicked:before {
     content: "< " !important;
+}
+
+.options {
+    display: flex;
+    justify-content: space-between;
+}
+
+.new_post {
+    margin: auto;
+    width: fit-content;
+    padding: 20px 0;
+}
+
+.new_post form {
+    width: 800px;
+    height: auto;
+    padding: 25px;
+    border: 1px solid orange;
 }

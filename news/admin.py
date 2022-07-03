@@ -5,8 +5,8 @@ from .models import *
 # Register your models here.
 class TagAdmin(admin.ModelAdmin):
     ordering = ('-id',)
-    list_display = ('id', 'title')
-    list_display_links = ('id', 'title')
+    list_display = ('title',)
+    list_display_links = ('title',)
     search_fields = ('id', 'title')
     search_help_text = 'ID или название'
 

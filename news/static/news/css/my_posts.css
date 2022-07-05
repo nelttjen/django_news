@@ -1,0 +1,66 @@
+.posts-container {
+    width: 900px;
+    border: 1px solid orange;
+    padding: 25px;
+    margin: auto;
+}
+
+.main-container {
+    display: flex;
+}
+
+.tag-selection {
+    border: 1px solid green;
+    height: fit-content;
+    padding: 15px;
+}
+
+.cards {
+    width: fit-content;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start;
+    padding: 12px;
+    gap: 24px 24px;
+}
+
+.card {
+    width: 400px;
+    height: fit-content;
+}
+
+.card-image {
+    max-width: 300px;
+    max-height: 200px;
+    margin: auto;
+}
+
+.card-content {
+    height: 144px;
+}
+
+.no-posts {
+    margin: 50px auto;
+    width: fit-content;
+}
+
+.create-new {
+    text-align: center;
+}
+
+.card-time p {
+    margin-bottom: 5px;
+}
+
+.tag_checkbox {
+    user-select: none;
+}
+.tag_checkbox div label {
+    cursor: pointer;
+}
+
+.tag-form .buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}

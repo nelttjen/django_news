@@ -17,9 +17,9 @@ from django.core.mail import send_mail
 from django.utils import timezone
 
 from .forms import RegisterForm, LoginForm, ForgotForm, ResetForm
-from .models import ActivatedUser, ResetPasswordCode
+from .models import ActivatedUser, ResetPasswordCode, DEFAULT_CODE_TIME
 from .checks import LoginAbility, PasswordStrongCheck
-from news_django.settings import env, DOMAIN_NAME, EMAIL_HOST_USER, DEBUG, SESSION_EXPIRY
+from news_django.settings import DOMAIN_NAME, EMAIL_HOST_USER, DEBUG, SESSION_EXPIRY
 from user_profile.models import ExtendedUser
 
 # initial values
@@ -50,12 +50,13 @@ def md5code(username=''):
                         str(random.randint(0, 999999))).encode())
 
 
-def create_code(user, deactivate_user: bool = True) -> bool:
+def create_code(user, deactivate_user: bool = False) -> bool:
     code = md5code(user.username)
     a_user = ActivatedUser.objects.create(
         user=user,
         activated=False,
-        verification_code=code.hexdigest()
+        verification_code=code.hexdigest(),
+        code_valid_until=DEFAULT_CODE_TIME,
     )
     if not user.is_superuser:
         email_data = {
@@ -85,6 +86,7 @@ def create_reset_code(user: User):
         code=md5code(user.username).hexdigest(),
         activated=False,
         user=user,
+        valid_until=DEFAULT_CODE_TIME,
     )
 
 
@@ -171,6 +173,8 @@ def def_login(request):
                     login(request, user)
                     if not data.get('remember'):
                         request.session.set_expiry(SESSION_EXPIRY)
+                    if 'next' in request.GET.keys():
+                        return redirect(request.GET.get('next'))
                     messages.success(request, 'Вы вошли в аккаунт')
                     return redirect('/profile')
                 else:

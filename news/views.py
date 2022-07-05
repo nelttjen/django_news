@@ -3,10 +3,12 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect as redirect
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
-from .forms import PostForm
-from .models import Post
+from .forms import PostForm, TagSelectionForm
+from .models import Post, Tag
+
 
 # debug stuff
 def test(request):
@@ -26,6 +28,45 @@ def index(request):
     return HttpResponse('<a href="new_post">Hello world!</a>')
 
 
+@login_required
+def my_posts(request):
+    form = TagSelectionForm()
+    list_posts = []
+    posts = Post.objects.filter(author=request.user).all()
+    if request.method == 'POST':
+        form = TagSelectionForm(request.POST)
+        if form.is_valid():
+            match = '&match=1' if 'fsort' in request.POST.keys() else ''
+            return redirect(f'/news/my_posts?filter={",".join(map(str, form.cleaned_data.get("categories")))}{match}')
+    if 'filter' in request.GET.keys():
+        tag_str = request.GET.get('filter').split(',')
+        tags = []
+        for tag in Tag.objects.all():
+            if tag.__str__() in tag_str:
+                tags.append(tag)
+        form = TagSelectionForm(initial={
+            'categories': tags,
+        })
+        if tags:
+            for post in posts:
+                post_tags = post.tags.all()
+                checks = [tag in post_tags for tag in tags]
+                print(post_tags, checks)
+                check = all(checks) if request.GET.get('match') else any(checks)
+                if check:
+                    list_posts.append(post)
+            if not list_posts:
+                # made for showing no posts if filter goes 0 posts
+                posts = None
+    data = {
+        'posts': list_posts or posts,
+        'form': form,
+    }
+
+    return render(request, 'news/my_posts.html', context=data)
+
+
+@login_required
 def new_post(request):
     form = PostForm()
 
@@ -39,26 +80,26 @@ def new_post(request):
                     content=data.get('content'),
                     author=request.user,
                 )
-                if request.FILES.get('image'):
-                    file: TemporaryUploadedFile = request.FILES.get('image')
-                    file.name = _new.id
-                    _new.image = file
                 _new.is_posted = 'post' in request.POST.keys()
                 _new.save()
-
+                if request.FILES.get('image'):
+                    file: TemporaryUploadedFile = request.FILES.get('image')
+                    _new.image = file
+                    _new.save()
                 for tag in data.get('categories'):
                     _new.tags.add(tag)
-
                 if 'post' in request.POST.keys():
                     messages.success(request, 'Ваша запись была отпубликована')
                     return redirect('/profile')
                 else:
                     messages.success(request, 'Ваша запись была сохранена')
-                    return redirect('/profile')
+                    return redirect('/news/my_posts')
         else:
             messages.error(request, 'Неизвестное действие')
 
     data = {
         'form': form,
+        'edit_mode': False,
+        'is_posted': False,
     }
     return render(request, 'news/post.html', context=data)

@@ -11,7 +11,7 @@ class ActivatedUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     verification_code = models.CharField(max_length=200, unique=True)
-    code_valid_until = models.DateTimeField(default=DEFAULT_CODE_TIME)
+    code_valid_until = models.DateTimeField()
 
     activated = models.BooleanField(default=False)
     activated_on = models.DateTimeField(blank=True, null=True)
@@ -42,7 +42,7 @@ class ResetPasswordCode(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, unique=False)
 
     code = models.CharField(max_length=200, unique=True)
-    valid_until = models.DateTimeField(default=DEFAULT_CODE_TIME)
+    valid_until = models.DateTimeField()
 
     activated = models.BooleanField(default=False)
     activated_on = models.DateTimeField(blank=True, null=True)

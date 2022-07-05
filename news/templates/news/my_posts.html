@@ -4,40 +4,67 @@
 {% block head %}
     <title>My Posts</title>
     <link rel="stylesheet" href="{% static "news/css/my_posts.css" %}?{{ reload }}">
+    <script src="{% static "news/js/tags.js" %}?{{reload}}"></script>
 {% endblock %}
 {% block container %}
-    <div class="posts-container">
-        <h2 style="text-align: center;">Ваши записи</h2>
-        <div class="create-new">
-            <h3><a href="/news/new_post">Создать новую запись</a></h3>
+    <div class="main-container">
+        <div class="tag-selection">
+            <h6>Теги (можно выбрать несколько):</h6>
+            <form action="" method="post" class="tag-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="buttons">
+                    <button class="btn btn-primary" type="submit">Частичное совпадение</button>
+                    <button class="btn btn-primary" name="fsort" value="" type="submit">Полное совпадение</button>
+                    <a href="/news/my_posts" class="btn btn-danger" style="text-decoration: none;">Отчистить</a>
+                </div>
+            </form>
+            
         </div>
-        {% include "include/messages.html"%}
-        {% if posts %}
-            {% for post in posts %}
-                <div class="card mb-3">
-                    {% if post.image %}
-                    <img src="{{ post.image.url }}" class="card-img-top card-image" alt="No image">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{post.title}}</h5>
-                        <p class="card-text">{{post.content}}</p>
-                        <p>Статус новости: 
-                            {% if not post.is_posted %}
-                            <span style="color: red;">Не отпубликована</span>
+        <div class="posts-container">
+            <h2 style="text-align: center;">Ваши записи</h2>
+            <div class="create-new">
+                <h3><a href="/news/new_post">Создать новую запись</a></h3>
+            </div>
+            {% include "include/messages.html"%}
+            {% if posts %}
+                <div class="cards">
+                    {% for post in posts %}
+                        <div class="card">
+                            {% if post.image %}
+                            <img src="{{ post.image.url }}" class="card-img-top card-image" alt="No image">
                             {% else %}
-                            <span style="color: green;">Отпубликована</span>
+                            <img src="{% static "news/img/no-image.jpg"%}" class="card-img-top card-image" alt="No image">
                             {% endif %}
-                        </p>
-                        <div class="card-time">
-                            <p class="card-text"><small class="text-muted">Дата публикации: {{ post.creation_date }}</small></p>
-                            <p class="card-text"><small class="text-muted">Последнее редактирование: {{ post.last_edit_time|localtime }}</small></p>
-                        </div>
-                        <a href="/news/my_posts/edit/{{post.id}}" class="btn btn-primary" style="text-decoration: none;">Редактировать</a>
+                            <div class="card-body">
+                                <h5 class="card-title">{{post.title}}</h5>
+                                <p class="card-content">{{post.content|truncatechars:250}}</p>
+                                <p>Статус новости: 
+                                    {% if not post.is_posted %}
+                                    <span style="color: red;">Не отпубликована</span>
+                                    {% else %}
+                                    <span style="color: green;">Отпубликована</span>
+                                    {% endif %}
+                                </p>
+                                <p class="post-tags">Теги: 
+                                    {% if post.tags.all %}
+                                    <span>{{post.tags.all|join:", "}}</span>
+                                    {% else %}
+                                    <span>Нет</span>
+                                    {% endif %}
+                                </p>
+                                <div class="card-time">
+                                    <p class="card-text"><small class="text-muted">Дата создания: {{ post.creation_date }}</small></p>
+                                    <p class="card-text"><small class="text-muted">Последнее редактирование: {{ post.last_edit_time|localtime }}</small></p>
+                                </div>
+                                <a href="/news/my_posts/edit/{{post.id}}" class="btn btn-primary mt-3" style="text-decoration: none;">Редактировать</a>
+                            </div>
                     </div>
-              </div>
-            {% endfor %}
-        {% else %}
-            <h4 class="no-posts">У вас пока нет ни одной записи. <a href="/news/new_post">Создать</a></h4>
-        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <h4 class="no-posts">У вас пока нет ни одной записи. <a href="/news/new_post">Создать</a></h4>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

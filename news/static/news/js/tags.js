@@ -1,5 +1,5 @@
 let show = true;
-const MAX_ITEMS = 4;
+const MAX_ITEMS = 10;
 
 $(document).ready(function () {
     let items = $("#id_categories div");

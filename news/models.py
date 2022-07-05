@@ -35,10 +35,11 @@ class Post(models.Model):
     class Meta:
         verbose_name = 'Новость'
         verbose_name_plural = 'Новости'
+        ordering = ('-creation_date', '-last_edit_time', 'title')
 
 
 class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
 
@@ -48,6 +49,11 @@ class Comment(models.Model):
     content = models.TextField()
 
     is_visible = models.BooleanField(default=True)
+
+
+class Read(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
 
 class Tag(models.Model):

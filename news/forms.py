@@ -3,6 +3,11 @@ from django import forms
 from .models import Tag
 
 
+class TagSelectionForm(forms.Form):
+    categories = forms.ModelMultipleChoiceField(Tag.objects, required=False, label=False,
+                                                widget=forms.CheckboxSelectMultiple(attrs={'class': 'tag_checkbox'}))
+
+
 class PostForm(forms.Form):
     title = forms.CharField(label='Название новости',
                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название'}))

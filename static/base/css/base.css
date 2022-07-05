@@ -60,3 +60,17 @@ body {
     color: crimson;
 }
 
+.size_formatter {
+    margin-left: 25px;
+    border: none;
+}
+
+.size_formatter:before {
+    width: 25px;
+    height: 25px;
+    content: "> ";
+}
+
+.size_formatter.clicked:before {
+    content: "< " !important;
+}

@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -11,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from .forms import PostForm, TagSelectionForm
 from .models import Post, Tag
+
 
 
 # debug stuff
@@ -70,6 +72,13 @@ def my_posts(request):
 
 @login_required
 def edit_post(request, post_id):
+
+    def delete_post_image(image):
+        try:
+            os.remove(image.path)
+        except Exception as e:
+            print(f'[ERROR] Deleting file: {image.path}, {e.__str__()}')
+
     try:
         post = Post.objects.get(pk=post_id)
     except ObjectDoesNotExist:
@@ -89,6 +98,8 @@ def edit_post(request, post_id):
             post.content = f_data.get('content')
 
             if request.FILES.get('image'):
+                if post.image:
+                    delete_post_image(post.image)
                 post.image = request.FILES.get('image')
 
             tags = f_data.get('categories')
@@ -99,6 +110,8 @@ def edit_post(request, post_id):
             post.last_edit_time = timezone.now()
             if any([req in request.POST.keys() for req in ['post', 'hide', 'delete']]):
                 if 'delete' in request.POST.keys():
+                    if post.image:
+                       delete_post_image(post.image)
                     post.delete()
                     messages.info(request, f'Новость с ID: {post_id} успешно была удалена')
                     return redirect('/news/my_posts')

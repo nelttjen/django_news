@@ -27,15 +27,15 @@ class Post(models.Model):
     content = models.TextField()
     image = models.ImageField(upload_to=path_and_rename, blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    creation_date = models.DateField(auto_now=True)
-    last_edit_time = models.DateTimeField(auto_now=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    last_edit_time = models.DateTimeField(auto_now_add=True)
     is_posted = models.BooleanField(default=False)
     tags = models.ManyToManyField('Tag', blank=True)
 
     class Meta:
         verbose_name = 'Новость'
         verbose_name_plural = 'Новости'
-        ordering = ('-creation_date', '-last_edit_time', 'title')
+        ordering = ('-creation_date', 'title')
 
 
 class Like(models.Model):
@@ -58,6 +58,11 @@ class Read(models.Model):
 
 class Tag(models.Model):
     title = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+        ordering = ('title',)
 
     def __str__(self):
         return self.title

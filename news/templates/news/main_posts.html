@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+    <title>News</title>
+    <link rel="stylesheet" href="{% static "news/css/main_posts.css" %}?{{ reload }}">
+    <script src="{% static "news/js/tags.js" %}?{{reload}}"></script>
+{% endblock %}
+{% block container %}
+    {# {% include "news/include/tags.html "%} #}
+{% endblock %}

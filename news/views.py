@@ -14,7 +14,6 @@ from .forms import PostForm, TagSelectionForm
 from .models import Post, Tag
 
 
-
 # debug stuff
 def test(request):
     return HttpResponse('Test here!')
@@ -24,13 +23,9 @@ def show(request):
     raise Exception
 
 
-def time(request):
-    return render(request, 'news/test.html', context={'date': timezone.now()})
-
-
 # views
 def index(request):
-    return HttpResponse('<a href="new_post">Hello world!</a>')
+    return render(request, 'news/main_posts.html', context={})
 
 
 @login_required
@@ -72,7 +67,6 @@ def my_posts(request):
 
 @login_required
 def edit_post(request, post_id):
-
     def delete_post_image(image):
         try:
             os.remove(image.path)
@@ -111,7 +105,7 @@ def edit_post(request, post_id):
             if any([req in request.POST.keys() for req in ['post', 'hide', 'delete']]):
                 if 'delete' in request.POST.keys():
                     if post.image:
-                       delete_post_image(post.image)
+                        delete_post_image(post.image)
                     post.delete()
                     messages.info(request, f'Новость с ID: {post_id} успешно была удалена')
                     return redirect('/news/my_posts')

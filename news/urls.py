@@ -14,5 +14,4 @@ urlpatterns = [
 if DEBUG:
     urlpatterns = [
         path('show/', show, name='show'),
-        path('date/', time)
     ] + urlpatterns

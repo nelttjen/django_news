@@ -1,0 +1,20 @@
+
+.tag-selection {
+    border: 1px solid green;
+    height: fit-content;
+    padding: 15px;
+}
+
+.tag_checkbox {
+    user-select: none;
+}
+
+.tag_checkbox div label {
+    cursor: pointer;
+}
+
+.tag-form .buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}

@@ -8,19 +8,7 @@
 {% endblock %}
 {% block container %}
     <div class="main-container">
-        <div class="tag-selection">
-            <h6>Теги (можно выбрать несколько):</h6>
-            <form action="" method="post" class="tag-form">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <div class="buttons">
-                    <button class="btn btn-primary" type="submit">Частичное совпадение</button>
-                    <button class="btn btn-primary" name="fsort" value="" type="submit">Полное совпадение</button>
-                    <a href="/news/my_posts" class="btn btn-danger" style="text-decoration: none;">Отчистить</a>
-                </div>
-            </form>
-            
-        </div>
+        {% include "news/include/tags.html "%}
         <div class="posts-container">
             <h2 style="text-align: center;">Ваши записи</h2>
             <div class="create-new">
@@ -57,7 +45,7 @@
                                     <p class="card-text"><small class="text-muted">Дата создания: {{ post.creation_date }}</small></p>
                                     <p class="card-text"><small class="text-muted">Последнее редактирование: {{ post.last_edit_time|localtime }}</small></p>
                                 </div>
-                                <a href="/news/my_posts/edit/{{post.id}}" class="btn btn-primary mt-3" style="text-decoration: none;">Редактировать</a>
+                                <a href="/news/my_posts/edit/id{{post.id}}" class="btn btn-primary mt-3" style="text-decoration: none;">Редактировать</a>
                             </div>
                     </div>
                     {% endfor %}

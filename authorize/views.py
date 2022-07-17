@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import random
 import string
+from smtplib import SMTPSenderRefused, SMTPAuthenticationError
 
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import ObjectDoesNotExist, Q
@@ -15,6 +16,8 @@ from django.http import HttpResponseRedirect as redirect
 from django.db.utils import IntegrityError
 from django.core.mail import send_mail
 from django.utils import timezone
+from django.utils.html import strip_tags
+from django.template.loader import render_to_string
 
 from .forms import RegisterForm, LoginForm, ForgotForm, ResetForm
 from .models import ActivatedUser, ResetPasswordCode, DEFAULT_CODE_TIME
@@ -30,15 +33,24 @@ LOGIN_MAX = 32
 
 
 # not view defs
-def send_email(data) -> int:
+def send_email(data, silent_fail: bool = False) -> int:
     try:
-        assert all([data.get('subject'), data.get('message'), EMAIL_HOST_USER, data.get('email_to')])
+        assert all([data.get('subject'), data.get('plain_message'), EMAIL_HOST_USER, data.get('email_to')])
+        if data.get('html_message'):
+            return send_mail(
+                data.get('subject'),
+                data.get('plain_message'),
+                EMAIL_HOST_USER,
+                data.get('email_to'),
+                html_message=data.get('html_message'),
+                fail_silently=silent_fail or not DEBUG
+            )
         return send_mail(
             data.get('subject'),
-            data.get('message'),
+            data.get('plain_message'),
             EMAIL_HOST_USER,
             data.get('email_to'),
-            fail_silently=not DEBUG
+            fail_silently=silent_fail or not DEBUG
         )
     except AssertionError:
         return 0
@@ -50,24 +62,41 @@ def md5code(username=''):
                         str(random.randint(0, 999999))).encode())
 
 
-def create_code(user, deactivate_user: bool = False) -> bool:
+def create_code(user, deactivate_user: bool = False, delete_user: bool = False) -> bool:
     code = md5code(user.username)
+    valid_until = DEFAULT_CODE_TIME
     a_user = ActivatedUser.objects.create(
         user=user,
         activated=False,
         verification_code=code.hexdigest(),
-        code_valid_until=DEFAULT_CODE_TIME,
+        code_valid_until=valid_until,
     )
     if not user.is_superuser:
+        subject = 'Активация нового аккаунта'
+        link = f'{DOMAIN_NAME}/auth/activate/{code.hexdigest()}'
+        html_message = render_to_string('authorize/mail/register.html', context={
+            'username': user.username,
+            'link': link,
+            'time': int(round((valid_until - timezone.now()).seconds / 60))
+         })
+        plain_message = strip_tags(html_message)
         email_data = {
-            'subject': 'Активация нового аккаунта.',
-            'message': f'Ваша ссылка для активации аккаунта: {DOMAIN_NAME}/auth/activate/{code.hexdigest()}\n'
-                       f'Ссылка действительна 30 минут.',
+            'subject': subject,
+            'plain_message': plain_message,
             'email_to': [user.email],
+            'html_message': html_message,
         }
-        if not send_email(email_data):
-            user.is_active = not deactivate_user
-            return False
+        try:
+            if not send_email(email_data):
+                if deactivate_user:
+                    user.is_active = False
+                elif delete_user:
+                    user.delete()
+                return False
+        except (SMTPSenderRefused, SMTPAuthenticationError) as e:
+            if delete_user:
+                user.delete()
+            raise e
     else:
         # superuser activation bypass
         a_user.activated = True
@@ -205,12 +234,12 @@ def def_register(request):
                     if User.objects.filter(email=data.get('email')).first():
                         raise EmailIntegrityError
                     _new = create_new_user(data)
-                    if create_code(_new, deactivate_user=False):
+                    if create_code(_new, deactivate_user=False, delete_user=True):
                         messages.success(request, 'Регистрация успешна! '
                                                   'На ваш email была отправлена ссылка для активации аккаунта.')
                     else:
                         messages.error(request, 'Что-то пошло не так. Попробуйте ещё раз.')
-                    return redirect('/auth/login')
+                    return redirect('/auth/register')
                 except IntegrityError:
                     messages.error(request, 'Логин уже занят')
                 except EmailIntegrityError:

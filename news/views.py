@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
 
-from .forms import PostForm, TagSelectionForm
+from .forms import PostForm, TagSelectionForm, SearchForm
 from .models import Post, Tag, Like
 
 
@@ -23,12 +23,22 @@ def show(request):
     raise Exception
 
 
+def get_tag_link(form, match=False):
+    match = "&match=1" if match else ''
+    return f'filter={",".join(map(str, form.cleaned_data.get("categories")))}{match}'
+
+
 # views
 def index(request):
+    form = SearchForm()
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            return redirect('/news/search?')
     LATEST_MAX_POSTS = 8
     LIKED_MAX_POSTS = 8
     latest_news = Post.objects.filter(is_posted=True).order_by('-creation_date').all()[:LATEST_MAX_POSTS]
-    if request.user:
+    if request.user.is_authenticated:
         liked_news = [
             like.post for like in Like.objects.filter(user=request.user).order_by('-id').all()[:LIKED_MAX_POSTS]
         ]
@@ -37,7 +47,7 @@ def index(request):
     data = {
         'latest': latest_news,
         'liked': liked_news
-
+        
     }
     return render(request, 'news/main_posts.html', context=data)
 
@@ -50,8 +60,8 @@ def my_posts(request):
     if request.method == 'POST':
         form = TagSelectionForm(request.POST)
         if form.is_valid():
-            match = '&match=1' if 'fsort' in request.POST.keys() else ''
-            return redirect(f'/news/my_posts?filter={",".join(map(str, form.cleaned_data.get("categories")))}{match}')
+            # fsort in request means it's a match search
+            return redirect(f"/news/my_posts?{get_tag_link(form, 'fsort' in request.POST.keys())}")
     if 'filter' in request.GET.keys():
         tag_str = request.GET.get('filter').split(',')
         tags = []
@@ -93,6 +103,7 @@ def edit_post(request, post_id):
         return redirect('/news/my_posts')
     if post.author != request.user and not request.user.is_staff:
         messages.error(request, 'У вас нет доступа для редактирования этой новости')
+        return redirect('/news/my_posts')
     form = PostForm(initial={
         'title': post.title,
         'content': post.content,

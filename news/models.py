@@ -51,6 +51,10 @@ class Comment(models.Model):
     is_visible = models.BooleanField(default=True)
 
 
+class Subscriber(models.Model):
+    user = models.ForeignKey
+
+
 class Read(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)

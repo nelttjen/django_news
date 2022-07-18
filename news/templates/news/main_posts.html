@@ -7,4 +7,36 @@
 {% endblock %}
 {% block container %}
     {# {% include "news/include/tags.html "%} #}
+    <div class="main-container">
+        <div class="search-bar">
+
+        </div>
+        <div class="main-content">
+            <div class="main-line">
+                {% for item in main_posts %}
+                {% endfor %}
+            </div>
+            <div class="right-panel">
+                <div class="liked-news">
+                    {% if user.is_authenticated%}
+                        {% if liked_news%}
+                            {% for item in liked_news %}
+                                <div class="liked">
+
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="liked-center"> Вы пока не лайкнули ни одну новость.</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="liked-center">Для просмотра понравившихся новостей вы должны быть <a href="/auth/login">авторизованы</a>.</p>
+                    {% endif %}
+                </div>
+                <div class="newest-news">
+                    {% for item in latest %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

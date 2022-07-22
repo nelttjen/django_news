@@ -2,16 +2,65 @@ import datetime
 import os
 
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.http import HttpResponseRedirect as redirect
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
 
 from .forms import PostForm, TagSelectionForm, SearchForm
 from .models import Post, Tag, Like
+
+# global vars
+LATEST_MAX_POSTS = 8
+LIKED_MAX_POSTS = 8
+MAIN_MAX_POSTS = 1
+AJAX_MAX_POSTS = 1
+
+
+
+# not view defs
+def get_tag_link(form, match=False):
+    match = "&match=1" if match else ''
+    return f'filter={",".join(map(str, form.cleaned_data.get("categories")))}{match}'
+
+
+def is_ajax(request):
+    return request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+
+def get_posts_for_user(user):
+    now = timezone.now()
+    days_30 = now - datetime.timedelta(days=30)
+    return Post.objects.filter(
+        is_posted=True
+    ).filter(
+        creation_date__range=[days_30, now]
+    ).all()
+
+
+def ajax_load_more_news(request):
+    try:
+        assert is_ajax(request)
+        assert all(key in request.GET.keys() for key in ['post_id', 'user_id'])
+        user = User.objects.get(pk=request.GET.get('user_id'))
+        posts = get_posts_for_user(user)
+        post_index = list(posts).index(Post.objects.get(pk=request.GET.get('post_id')))
+        posts = posts[post_index + 1:post_index + AJAX_MAX_POSTS + 1]
+        data = []
+        for post in posts:
+            item = {
+                'id': post.id,
+                'title': post.title,
+                'content': post.content,
+            }
+            data.append(item)
+        return JsonResponse({'data': data})
+    except AssertionError:
+        return HttpResponseForbidden()
 
 
 # debug stuff
@@ -23,20 +72,14 @@ def show(request):
     raise Exception
 
 
-def get_tag_link(form, match=False):
-    match = "&match=1" if match else ''
-    return f'filter={",".join(map(str, form.cleaned_data.get("categories")))}{match}'
-
-
 # views
 def index(request):
     form = SearchForm()
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
-            return redirect('/news/search?')
-    LATEST_MAX_POSTS = 8
-    LIKED_MAX_POSTS = 8
+            return redirect(f'/news/search?{get_tag_link(form, "fsort" in request.POST.keys())}')
+
     latest_news = Post.objects.filter(is_posted=True).order_by('-creation_date').all()[:LATEST_MAX_POSTS]
     if request.user.is_authenticated:
         liked_news = [
@@ -44,11 +87,14 @@ def index(request):
         ]
     else:
         liked_news = None
+    main_posts = get_posts_for_user(request.user)[:MAIN_MAX_POSTS]
     data = {
+        'form': form,
         'latest': latest_news,
-        'liked': liked_news
-        
+        'liked': liked_news,
+        'main_posts': main_posts,
     }
+    print()
     return render(request, 'news/main_posts.html', context=data)
 
 

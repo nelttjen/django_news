@@ -14,4 +14,5 @@ urlpatterns = [
 if DEBUG:
     urlpatterns = [
         path('show/', show, name='show'),
+        path('ajax/', ajax_load_more_news, name='ajax')
     ] + urlpatterns

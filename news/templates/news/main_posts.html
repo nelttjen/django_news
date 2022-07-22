@@ -4,9 +4,14 @@
     <title>News</title>
     <link rel="stylesheet" href="{% static "news/css/main_posts.css" %}?{{ reload }}">
     <script src="{% static "news/js/tags.js" %}?{{reload}}"></script>
+    <script src="{% static "news/js/fetch_news.js" %}?{{reload}}"></script>
 {% endblock %}
 {% block container %}
-    {# {% include "news/include/tags.html "%} #}
+    <div id="content" style="display: none;">
+        
+        <p id="user_id">{% if request.user.is_authenticated %}{{ request.user.id }}{% else %}-1{% endif %}</p>
+        
+    </div>
     <div class="main-container">
         <div class="search-bar">
 
@@ -14,15 +19,56 @@
         <div class="main-content">
             <div class="main-line">
                 {% for item in main_posts %}
+                <div class="card" post_id="{{item.id}}">
+                    <div class="card-header">
+                      <div class="user-info">
+                        user
+                      </div>
+                      <div class="right-pannel">
+                        actions
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <h5 class="card-title">{{item.title}}</h5>
+                      <p class="card-text">{{item.content}}</p>
+                      <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                    <div class="card-footer">
+                        test
+                    </div>
+                </div>
+                  <br>
                 {% endfor %}
+                <div class="more">
+                    <button onclick="fetch_news()">test</button>
+                </div>
             </div>
             <div class="right-panel">
                 <div class="liked-news">
-                    {% if user.is_authenticated%}
-                        {% if liked_news%}
-                            {% for item in liked_news %}
+                    <h5>Вам понравилось</h5>
+                    {% if user.is_authenticated %}
+                        {% if liked %}
+                            {% for item in liked %}
                                 <div class="liked">
-
+                                    <div class="right-card">
+                                        <div class="image">
+                                            <img src=
+                                            "
+                                            {% if item.image %}
+                                                {{ item.image.url }}
+                                            {% else %}
+                                                {% static "news/img/no-image.jpg"%}
+                                            {% endif %}
+                                            " 
+                                            alt="" width="75" height="40">
+                                        </div>
+                                        <div class="title">
+                                            <p>{{ item.title|truncatechars:35 }}</p>
+                                        </div>
+                                        <div class="likes">
+                                            <p>{{ item.like_set.all|length }}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             {% endfor %}
                         {% else %}
@@ -33,7 +79,27 @@
                     {% endif %}
                 </div>
                 <div class="newest-news">
+                    <h5>Последние новости</h5>
                     {% for item in latest %}
+                        <div class="right-card">
+                            <div class="image">
+                                <img src=
+                                "
+                                {% if item.image %}
+                                    {{ item.image.url }}
+                                {% else %}
+                                    {% static "news/img/no-image.jpg"%}
+                                {% endif %}
+                                " 
+                                alt="" width="75" height="40">
+                            </div>
+                            <div class="title">
+                                <p>{{ item.title|truncatechars:35 }}</p>
+                            </div>
+                            <div class="likes">
+                                <p>{{ item.like_set.all|length }}</p>
+                            </div>
+                        </div>
                     {% endfor %}
                 </div>
             </div>

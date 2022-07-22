@@ -39,24 +39,31 @@ class Post(models.Model):
 
 
 class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='like_user')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='comment_user')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     content = models.TextField()
 
     is_visible = models.BooleanField(default=True)
 
 
+class CommentLike(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_like_user')
+    user = models.ForeignKey(Comment, on_delete=models.CASCADE)
+
+
 class Subscriber(models.Model):
-    user = models.ForeignKey
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriber_user')
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE)
+    notifications = models.BooleanField(default=False)
 
 
 class Read(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='read_user')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
 

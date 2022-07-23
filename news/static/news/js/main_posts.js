@@ -1,16 +1,18 @@
-function fetch_news() {
+function fetch_news(sender) {
+    sender.preventDefault()
     let user_id = $("#content #user_id").html();
     let post_id = $(".main-line .card").last().attr("post_id");
     $.ajax({
         type: "GET",
         url: `/news/ajax/?user_id=${user_id}&post_id=${post_id}`,
         success: function (response) {
-            let data = response["data"]
-            let insert_html = ""
+            let data = response["data"];
+            let insert_html = "";
             if (data.length != 0) {
                 console.log(data);
                 data.forEach(element => {
-                    html = `
+                    insert_html = insert_html + 
+                    `
                     <div class="card" post_id="${element['id']}">
                         <div class="card-header">
                         <div class="user-info">
@@ -31,9 +33,8 @@ function fetch_news() {
                     </div>
                     <br>
                     `;
-                    insert_html = insert_html + html;
                 });
-                let more = $(".main-line .more")
+                let more = $(".main-line .more");
                 $(".main-line .more").remove();
                 $(".main-line").html($(".main-line").html() + insert_html);
                 more.appendTo($(".main-line"));

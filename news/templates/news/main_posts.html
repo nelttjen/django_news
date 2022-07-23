@@ -1,16 +1,21 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load tz %}
 {% block head %}
     <title>News</title>
     <link rel="stylesheet" href="{% static "news/css/main_posts.css" %}?{{ reload }}">
     <script src="{% static "news/js/tags.js" %}?{{reload}}"></script>
-    <script src="{% static "news/js/fetch_news.js" %}?{{reload}}"></script>
+    <script src="{% static "news/js/main_posts.js" %}?{{reload}}"></script>
+    <script async src="{% static "news/js/missed_avatars.js" %}?{{reload}}"></script>
+    <script async src="{% static "news/js/localtime.js" %}?{{reload}}"></script>
 {% endblock %}
 {% block container %}
     <div id="content" style="display: none;">
         
+        {% get_current_timezone as TIME_ZONE %}
+
         <p id="user_id">{% if request.user.is_authenticated %}{{ request.user.id }}{% else %}-1{% endif %}</p>
-        
+        <p id="timezone">TIME_ZONE</p>
     </div>
     <div class="main-container">
         <div class="search-bar">
@@ -22,8 +27,12 @@
                 <div class="card" post_id="{{item.id}}">
                     <div class="card-header">
                       <div class="user-info">
-                        user
-                      </div>
+                        <a href="/news/users/id{{item.author.id}}"><img src="/static/user_profile/img/profile_images/{{item.author.id}}.png" class="card-avatar avatar-validation"></a>
+                        <div>
+                            <p>{{item.author.username}}</p>
+                            <p>Отпубликовано: <span class="card-publish-time">{{item.creation_date|date:"d:m:Y:H:i:s"}}</span></p>
+                        </div>
+                    </div>
                       <div class="right-pannel">
                         actions
                       </div>
@@ -40,7 +49,7 @@
                   <br>
                 {% endfor %}
                 <div class="more">
-                    <button onclick="fetch_news()">test</button>
+                    <button class="btn btn-primary" onclick="fetch_news(this);">Показать больше</button>
                 </div>
             </div>
             <div class="right-panel">
@@ -63,7 +72,7 @@
                                             alt="" width="75" height="40">
                                         </div>
                                         <div class="title">
-                                            <p>{{ item.title|truncatechars:35 }}</p>
+                                            <a href="/news/posts/id{{item.id}}">{{ item.title|truncatechars:35 }}</a>
                                         </div>
                                         <div class="likes">
                                             <p>{{ item.like_set.all|length }}</p>
@@ -94,7 +103,7 @@
                                 alt="" width="75" height="40">
                             </div>
                             <div class="title">
-                                <p>{{ item.title|truncatechars:35 }}</p>
+                                <a href="/news/posts/id{{item.id}}">{{ item.title|truncatechars:35 }}</a>
                             </div>
                             <div class="likes">
                                 <p>{{ item.like_set.all|length }}</p>

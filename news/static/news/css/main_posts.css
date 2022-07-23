@@ -44,3 +44,13 @@
     width: 180px;
     text-align: center;
 }
+
+.user-info {
+    display: flex;
+}
+
+.card-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+}

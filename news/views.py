@@ -17,9 +17,8 @@ from .models import Post, Tag, Like
 # global vars
 LATEST_MAX_POSTS = 8
 LIKED_MAX_POSTS = 8
-MAIN_MAX_POSTS = 1
-AJAX_MAX_POSTS = 1
-
+MAIN_MAX_POSTS = 25
+AJAX_MAX_POSTS = 25
 
 
 # not view defs

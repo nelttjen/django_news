@@ -77,3 +77,9 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class PageToken(models.Model):
+    token = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="token_user")
+    expired = models.DateTimeField()

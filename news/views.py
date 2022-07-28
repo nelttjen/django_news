@@ -1,5 +1,6 @@
 import datetime
 import os
+import uuid
 
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
@@ -12,7 +13,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
 
 from .forms import PostForm, TagSelectionForm, SearchForm
-from .models import Post, Tag, Like
+from .models import Post, Tag, Like, PageToken
 
 # global vars
 LATEST_MAX_POSTS = 8
@@ -31,6 +32,20 @@ def is_ajax(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
 
+def user_token(user):
+    _prev = PageToken.objects.filter(user=user).first()
+    if _prev:
+        if _prev.expired < timezone.now():
+            _prev.delete()
+        else:
+            return _prev
+    return PageToken.objects.create(
+        token=uuid.uuid4().hex,
+        user=user,
+        expired=timezone.now() + datetime.timedelta(days=1)
+    )
+
+
 def get_posts_for_user(user):
     now = timezone.now()
     days_30 = now - datetime.timedelta(days=30)
@@ -41,6 +56,7 @@ def get_posts_for_user(user):
     ).all()
 
 
+# ajax defs
 def ajax_load_more_news(request):
     try:
         assert is_ajax(request)
@@ -62,6 +78,15 @@ def ajax_load_more_news(request):
         return HttpResponseForbidden()
 
 
+def ajax_like(request):
+    try:
+
+        print(request.POST.keys())
+        return HttpResponseForbidden()
+    except AssertionError:
+        return HttpResponseForbidden()
+
+
 # debug stuff
 def test(request):
     return HttpResponse('Test here!')
@@ -74,6 +99,8 @@ def show(request):
 # views
 def index(request):
     form = SearchForm()
+    token = user_token(request.user)
+
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
@@ -92,8 +119,8 @@ def index(request):
         'latest': latest_news,
         'liked': liked_news,
         'main_posts': main_posts,
+        'token': token.token,
     }
-    print()
     return render(request, 'news/main_posts.html', context=data)
 
 
@@ -104,6 +131,7 @@ def my_posts(request):
     posts = Post.objects.filter(author=request.user).all()
     if request.method == 'POST':
         form = TagSelectionForm(request.POST)
+        print(request.POST.keys())
         if form.is_valid():
             # fsort in request means it's a match search
             return redirect(f"/news/my_posts?{get_tag_link(form, 'fsort' in request.POST.keys())}")

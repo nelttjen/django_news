@@ -11,11 +11,9 @@
 {% endblock %}
 {% block container %}
     <div id="content" style="display: none;">
-        
-        {% get_current_timezone as TIME_ZONE %}
-
         <p id="user_id">{% if request.user.is_authenticated %}{{ request.user.id }}{% else %}-1{% endif %}</p>
-        <p id="timezone">TIME_ZONE</p>
+        <p id="page_user_token">{{token}}</p>
+        <p id="csrf">{% csrf_token %}</p>
     </div>
     <div class="main-container">
         <div class="search-bar">
@@ -28,8 +26,8 @@
                     <div class="card-header">
                       <div class="user-info">
                         <a href="/news/users/id{{item.author.id}}"><img src="/static/user_profile/img/profile_images/{{item.author.id}}.png" class="card-avatar avatar-validation"></a>
-                        <div>
-                            <p>{{item.author.username}}</p>
+                        <div style="margin-left: 10px;">
+                            <a href="/news/users/id{{item.author.id}}"><p>{{item.author.username}}</p></a>
                             <p>Отпубликовано: <span class="card-publish-time">{{item.creation_date|date:"d:m:Y:H:i:s"}}</span></p>
                         </div>
                     </div>
@@ -43,7 +41,18 @@
                       <a href="#" class="btn btn-primary">Go somewhere</a>
                     </div>
                     <div class="card-footer">
-                        test
+                        <div class="likes">
+                            {% if item.like_set.all|has_user:user %}
+                            <div class="like-button active" id="like-button">
+                                <img src="/static/news/img/like_active.png" alt="" width="32" height="32">
+                            </div>
+                            {% else %}
+                            <div class="like-button" id="like-button">
+                                <img src="/static/news/img/like.png" alt="" width="32" height="32">
+                            </div>
+                            {% endif %}
+                            <span style="margin-left: 10px; line-height: -50%;">{{ item.like_set.all|length }}</span>
+                        </div>
                     </div>
                 </div>
                   <br>

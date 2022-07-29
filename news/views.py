@@ -11,9 +11,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.csrf import csrf_exempt
 
 from .forms import PostForm, TagSelectionForm, SearchForm
-from .models import Post, Tag, Like, PageToken
+from .models import Post, Tag, Like, PageToken, Read
 
 # global vars
 LATEST_MAX_POSTS = 8
@@ -32,10 +33,23 @@ def is_ajax(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
 
+def get_user_by_token(token):
+    token_obj = PageToken.objects.filter(token=token).first()
+    if not token_obj:
+        return False
+    return token_obj.user
+
+def check_user_token_valid(token):
+    token_obj = PageToken.objects.filter(token=token).first()
+    if not token_obj:
+        return False
+    return token_obj.expired > timezone.now()
+
+
 def user_token(user):
     _prev = PageToken.objects.filter(user=user).first()
     if _prev:
-        if _prev.expired < timezone.now():
+        if not check_user_token_valid(_prev):
             _prev.delete()
         else:
             return _prev
@@ -78,20 +92,41 @@ def ajax_load_more_news(request):
         return HttpResponseForbidden()
 
 
+@csrf_exempt
 def ajax_like(request):
     try:
+        assert is_ajax(request)
+        token = request.POST.get('token')
+        post_id = request.POST.get('post_id')
+        method = request.POST.get('method')
+        assert all([i is not None for i in [token, post_id, method]])
+        assert method in ['add', 'remove']
+        assert check_user_token_valid(token)
 
-        print(request.POST.keys())
+        user = get_user_by_token(token)
+        post = Post.objects.get(pk=post_id)
+        if method == 'add':
+            if not Like.objects.filter(post=post).filter(user=user).first():
+                Like.objects.create(
+                    post=post,
+                    user=user
+                )
+        elif method == 'remove':
+            _prev = Like.objects.filter(post=post).filter(user=user).first()
+            if _prev:
+                _prev.delete()
+
+        likes = len(post.like_set.all())
+        return JsonResponse({
+            'message': 'OK',
+            'likes': likes
+        })
+    except (AssertionError, ObjectDoesNotExist):
         return HttpResponseForbidden()
-    except AssertionError:
-        return HttpResponseForbidden()
 
 
-# debug stuff
-def test(request):
-    return HttpResponse('Test here!')
 
-
+# debug
 def show(request):
     raise Exception
 

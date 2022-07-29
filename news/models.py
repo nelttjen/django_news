@@ -3,10 +3,9 @@ from uuid import uuid4
 
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils import timezone
 
 # Create your models here.
-from django.utils import timezone
 
 
 def path_and_rename(instance, filename):
@@ -65,6 +64,7 @@ class Subscriber(models.Model):
 class Read(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='read_user')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    read_time = models.DateTimeField(auto_now_add=True)
 
 
 class Tag(models.Model):

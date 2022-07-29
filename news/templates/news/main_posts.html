@@ -13,7 +13,6 @@
     <div id="content" style="display: none;">
         <p id="user_id">{% if request.user.is_authenticated %}{{ request.user.id }}{% else %}-1{% endif %}</p>
         <p id="page_user_token">{{token}}</p>
-        <p id="csrf">{% csrf_token %}</p>
     </div>
     <div class="main-container">
         <div class="search-bar">

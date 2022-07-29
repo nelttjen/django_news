@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import hashlib
 import random
 import string
@@ -64,7 +65,7 @@ def md5code(username=''):
 
 def create_code(user, deactivate_user: bool = False, delete_user: bool = False) -> bool:
     code = md5code(user.username)
-    valid_until = DEFAULT_CODE_TIME
+    valid_until = timezone.now() + datetime.timedelta(seconds=60 * DEFAULT_CODE_TIME)
     a_user = ActivatedUser.objects.create(
         user=user,
         activated=False,
@@ -77,7 +78,7 @@ def create_code(user, deactivate_user: bool = False, delete_user: bool = False) 
         html_message = render_to_string('authorize/mail/register.html', context={
             'username': user.username,
             'link': link,
-            'time': int(round((valid_until - timezone.now()).seconds / 60))
+            'time': DEFAULT_CODE_TIME,
          })
         plain_message = strip_tags(html_message)
         email_data = {
@@ -115,7 +116,7 @@ def create_reset_code(user: User):
         code=md5code(user.username).hexdigest(),
         activated=False,
         user=user,
-        valid_until=DEFAULT_CODE_TIME,
+        valid_until=timezone.now() + datetime.timedelta(seconds=60 * DEFAULT_CODE_TIME),
     )
 
 
@@ -234,9 +235,10 @@ def def_register(request):
                     if User.objects.filter(email=data.get('email')).first():
                         raise EmailIntegrityError
                     _new = create_new_user(data)
-                    if create_code(_new, deactivate_user=False, delete_user=True):
+                    if create_code(_new, deactivate_user=False, delete_user=False):
                         messages.success(request, 'Регистрация успешна! '
                                                   'На ваш email была отправлена ссылка для активации аккаунта.')
+                        return redirect('/auth/login')
                     else:
                         messages.error(request, 'Что-то пошло не так. Попробуйте ещё раз.')
                     return redirect('/auth/register')

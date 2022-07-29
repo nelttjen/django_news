@@ -3,10 +3,9 @@ from uuid import uuid4
 
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils import timezone
 
 # Create your models here.
-from django.utils import timezone
 
 
 def path_and_rename(instance, filename):
@@ -39,21 +38,33 @@ class Post(models.Model):
 
 
 class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='like_user')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='comment_user')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     content = models.TextField()
 
     is_visible = models.BooleanField(default=True)
 
 
+class CommentLike(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_like_user')
+    user = models.ForeignKey(Comment, on_delete=models.CASCADE)
+
+
+class Subscriber(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriber_user')
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE)
+    notifications = models.BooleanField(default=False)
+
+
 class Read(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='read_user')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    read_time = models.DateTimeField(auto_now_add=True)
 
 
 class Tag(models.Model):
@@ -66,3 +77,9 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class PageToken(models.Model):
+    token = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="token_user")
+    expired = models.DateTimeField()

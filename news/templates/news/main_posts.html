@@ -40,6 +40,7 @@
                       <a href="#" class="btn btn-primary">Go somewhere</a>
                     </div>
                     <div class="card-footer">
+                        {% if user.is_authenticated %}
                         <div class="likes">
                             {% if item.like_set.all|has_user:user %}
                             <div class="like-button active" id="like-button">
@@ -52,6 +53,9 @@
                             {% endif %}
                             <span style="margin-left: 10px; line-height: -50%;">{{ item.like_set.all|length }}</span>
                         </div>
+                        {% else %}
+                        <span><a href="/auth/login">Авторизуйтесь</a> для дополнительный действий</span>
+                        {% endif %}
                     </div>
                 </div>
                   <br>
@@ -123,3 +127,4 @@
         </div>
     </div>
 {% endblock %}
+

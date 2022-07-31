@@ -39,6 +39,7 @@ def get_user_by_token(token):
         return False
     return token_obj.user
 
+
 def check_user_token_valid(token):
     token_obj = PageToken.objects.filter(token=token).first()
     if not token_obj:
@@ -47,6 +48,8 @@ def check_user_token_valid(token):
 
 
 def user_token(user):
+    if not isinstance(user, User):
+        return None
     _prev = PageToken.objects.filter(user=user).first()
     if _prev:
         if not check_user_token_valid(_prev):
@@ -88,20 +91,19 @@ def ajax_load_more_news(request):
             }
             data.append(item)
         return JsonResponse({'data': data})
-    except AssertionError:
+    except (AssertionError, ObjectDoesNotExist):
         return HttpResponseForbidden()
 
 
-@csrf_exempt
 def ajax_like(request):
     try:
-        assert is_ajax(request)
+        assert is_ajax(request), 'not ajax'
         token = request.POST.get('token')
         post_id = request.POST.get('post_id')
         method = request.POST.get('method')
-        assert all([i is not None for i in [token, post_id, method]])
-        assert method in ['add', 'remove']
-        assert check_user_token_valid(token)
+        assert all([i is not None for i in [token, post_id, method]]), "data wrong"
+        assert method in ['add', 'remove'], 'method wrong'
+        assert check_user_token_valid(token), 'token fail'
 
         user = get_user_by_token(token)
         post = Post.objects.get(pk=post_id)
@@ -121,9 +123,9 @@ def ajax_like(request):
             'message': 'OK',
             'likes': likes
         })
-    except (AssertionError, ObjectDoesNotExist):
+    except (AssertionError, ObjectDoesNotExist) as e:
+        print(e)
         return HttpResponseForbidden()
-
 
 
 # debug
@@ -154,7 +156,7 @@ def index(request):
         'latest': latest_news,
         'liked': liked_news,
         'main_posts': main_posts,
-        'token': token.token,
+        'token': token.token if token else None,
     }
     return render(request, 'news/main_posts.html', context=data)
 

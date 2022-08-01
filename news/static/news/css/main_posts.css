@@ -55,7 +55,7 @@
     border-radius: 50%;
 }
 
-.likes {
+.card-footer div {
     display: flex;
 }
 
@@ -68,4 +68,16 @@
     height: 32px;
     border: none;
     cursor: pointer;
+}
+
+.comm-button {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.comm-button img {
+    width: 20px;
+    height: 20px;
 }

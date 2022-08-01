@@ -108,7 +108,7 @@ def ajax_like(request):
         user = get_user_by_token(token)
         post = Post.objects.get(pk=post_id)
         if method == 'add':
-            if not Like.objects.filter(post=post).filter(user=user).first():
+            if not Like.objects.filter(post=post).filter(user=user).exists():
                 Like.objects.create(
                     post=post,
                     user=user

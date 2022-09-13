@@ -45,14 +45,16 @@ class Like(models.Model):
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='comment_user')
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.TextField(max_length=2000)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    is_edited = models.BooleanField(default=False)
 
     is_visible = models.BooleanField(default=True)
 
 
 class CommentLike(models.Model):
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_like_user')
-    user = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_like_user')
 
 
 class Subscriber(models.Model):

@@ -2,10 +2,11 @@ from django.urls import path, re_path
 
 from news_django.settings import DEBUG
 from .views import *
+from .api import *
 
 
 ajax = [
-    path('ajax/', ajax_load_more_news, name='ajax_load_news'),
+    path('api/news', ajax_load_more_news, name='ajax_load_news'),
     path('api/like', ajax_like, name="ajax_like"),
 ]
 
@@ -19,4 +20,5 @@ urlpatterns = [
 if DEBUG:
     urlpatterns = [
         path('show/', show, name='show'),
+        path('js/', js, name='js')
     ] + urlpatterns

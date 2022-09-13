@@ -10,3 +10,5 @@ class NewsConfig(AppConfig):
     def ready(self):
         if not os.path.exists('uploads'):
             os.mkdir('uploads')
+
+

@@ -6,8 +6,6 @@
     <link rel="stylesheet" href="{% static "news/css/main_posts.css" %}?{{ reload }}">
     <script src="{% static "news/js/tags.js" %}?{{reload}}"></script>
     <script src="{% static "news/js/main_posts.js" %}?{{reload}}"></script>
-    <script async src="{% static "news/js/missed_avatars.js" %}?{{reload}}"></script>
-    <script async src="{% static "news/js/localtime.js" %}?{{reload}}"></script>
 {% endblock %}
 {% block container %}
     <div id="content" style="display: none;">
@@ -37,27 +35,40 @@
                     <div class="card-body">
                       <h5 class="card-title">{{item.title}}</h5>
                       <p class="card-text">{{item.content}}</p>
-                      <a href="#" class="btn btn-primary">Go somewhere</a>
+                      <a href="/news/posts/id{{item.id}}" class="btn btn-primary">Посмотреть новость</a>
                     </div>
                     <div class="card-footer">
+                        {% if user.is_authenticated %}
                         <div class="likes">
                             {% if item.like_set.all|has_user:user %}
                             <div class="like-button active" id="like-button">
                                 <img src="/static/news/img/like_active.png" alt="" width="32" height="32">
                             </div>
                             {% else %}
-                            <div class="like-button" id="like-button">
+                            <div class="like-button" id="like-button" >
                                 <img src="/static/news/img/like.png" alt="" width="32" height="32">
                             </div>
                             {% endif %}
-                            <span style="margin-left: 10px; line-height: -50%;">{{ item.like_set.all|length }}</span>
+                            <span style="margin-left: 10px;">{{ item.like_set.all|length }}</span>
                         </div>
+                        <div class="comments">
+                            <a class="comm-button" href="/news/posts/id{{item.id}}#comment">
+                                <img src="{% static "news/img/comment.png" %}?{{reload}}" alt="com">
+                            </a>
+                            <span class="comm-count">{{ item.comment_set.all|length }}</span>
+                        </div>
+                        <div class="reposts">
+                            reps
+                        </div>
+                        {% else %}
+                        <span><a href="/auth/login">Авторизуйтесь</a> для дополнительный действий</span>
+                        {% endif %}
                     </div>
                 </div>
                   <br>
                 {% endfor %}
                 <div class="more">
-                    <button class="btn btn-primary" onclick="fetch_news(this);">Показать больше</button>
+                    <button class="btn btn-primary">Показать больше</button>
                 </div>
             </div>
             <div class="right-panel">
@@ -123,3 +134,4 @@
         </div>
     </div>
 {% endblock %}
+

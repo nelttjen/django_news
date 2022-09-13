@@ -330,4 +330,7 @@ def reset_password(request):
 def logout_user(request):
     logout(request)
     messages.info(request, 'Вы вышли из аккаунта')
-    return redirect('/auth/login')
+    response = redirect('/auth/login')
+    if request.COOKIES.get('user_token') is not None:
+        response.delete_cookie('user_token')
+    return response

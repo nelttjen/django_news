@@ -1,136 +1,31 @@
-import datetime
 import os
-import uuid
 
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.http import HttpResponseRedirect as redirect
 from django.utils import timezone
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
-from django.views.decorators.csrf import csrf_exempt
 
 from .forms import PostForm, TagSelectionForm, SearchForm
-from .models import Post, Tag, Like, PageToken, Read
-
-# global vars
-LATEST_MAX_POSTS = 8
-LIKED_MAX_POSTS = 8
-MAIN_MAX_POSTS = 25
-AJAX_MAX_POSTS = 25
+from .models import Post, Tag, Like
+from .util import LATEST_MAX_POSTS, LIKED_MAX_POSTS, MAIN_MAX_POSTS
+from .util import user_token, get_posts_for_user, check_user_token_valid
 
 
-# not view defs
 def get_tag_link(form, match=False):
     match = "&match=1" if match else ''
     return f'filter={",".join(map(str, form.cleaned_data.get("categories")))}{match}'
 
 
-def is_ajax(request):
-    return request.headers.get('x-requested-with') == 'XMLHttpRequest'
-
-
-def get_user_by_token(token):
-    token_obj = PageToken.objects.filter(token=token).first()
-    if not token_obj:
-        return False
-    return token_obj.user
-
-
-def check_user_token_valid(token):
-    token_obj = PageToken.objects.filter(token=token).first()
-    if not token_obj:
-        return False
-    return token_obj.expired > timezone.now()
-
-
-def user_token(user):
-    if not isinstance(user, User):
-        return None
-    _prev = PageToken.objects.filter(user=user).first()
-    if _prev:
-        if not check_user_token_valid(_prev):
-            _prev.delete()
-        else:
-            return _prev
-    return PageToken.objects.create(
-        token=uuid.uuid4().hex,
-        user=user,
-        expired=timezone.now() + datetime.timedelta(days=1)
-    )
-
-
-def get_posts_for_user(user):
-    now = timezone.now()
-    days_30 = now - datetime.timedelta(days=30)
-    return Post.objects.filter(
-        is_posted=True
-    ).filter(
-        creation_date__range=[days_30, now]
-    ).all()
-
-
-# ajax defs
-def ajax_load_more_news(request):
-    try:
-        assert is_ajax(request)
-        assert all(key in request.GET.keys() for key in ['post_id', 'user_id'])
-        user = User.objects.get(pk=request.GET.get('user_id'))
-        posts = get_posts_for_user(user)
-        post_index = list(posts).index(Post.objects.get(pk=request.GET.get('post_id')))
-        posts = posts[post_index + 1:post_index + AJAX_MAX_POSTS + 1]
-        data = []
-        for post in posts:
-            item = {
-                'id': post.id,
-                'title': post.title,
-                'content': post.content,
-            }
-            data.append(item)
-        return JsonResponse({'data': data})
-    except (AssertionError, ObjectDoesNotExist):
-        return HttpResponseForbidden()
-
-
-def ajax_like(request):
-    try:
-        assert is_ajax(request), 'not ajax'
-        token = request.POST.get('token')
-        post_id = request.POST.get('post_id')
-        method = request.POST.get('method')
-        assert all([i is not None for i in [token, post_id, method]]), "data wrong"
-        assert method in ['add', 'remove'], 'method wrong'
-        assert check_user_token_valid(token), 'token fail'
-
-        user = get_user_by_token(token)
-        post = Post.objects.get(pk=post_id)
-        if method == 'add':
-            if not Like.objects.filter(post=post).filter(user=user).exists():
-                Like.objects.create(
-                    post=post,
-                    user=user
-                )
-        elif method == 'remove':
-            _prev = Like.objects.filter(post=post).filter(user=user).first()
-            if _prev:
-                _prev.delete()
-
-        likes = len(post.like_set.all())
-        return JsonResponse({
-            'message': 'OK',
-            'likes': likes
-        })
-    except (AssertionError, ObjectDoesNotExist) as e:
-        print(e)
-        return HttpResponseForbidden()
-
-
 # debug
 def show(request):
     raise Exception
+
+
+def js(request):
+    return render(request, 'news/js.html')
 
 
 # views
@@ -156,9 +51,14 @@ def index(request):
         'latest': latest_news,
         'liked': liked_news,
         'main_posts': main_posts,
-        'token': token.token if token else None,
     }
-    return render(request, 'news/main_posts.html', context=data)
+    response = render(request, 'news/main_posts.html', context=data)
+    if request.COOKIES.get('user_token'):
+        if not check_user_token_valid(request.COOKIES.get('user_token')) and token:
+            response.set_cookie("user_token", token.token)
+    elif token:
+        response.set_cookie("user_token", token.token)
+    return response
 
 
 @login_required

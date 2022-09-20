@@ -16,7 +16,6 @@ Including another URLconf
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from django.http import HttpResponseRedirect as redirect
 
 from news.views import *
 from .settings import MEDIA_URL, MEDIA_ROOT
@@ -31,6 +30,7 @@ urlpatterns = [
     path('news/', include('news.urls')),
     path('auth/', include('authorize.urls')),
     path('profile/', include('user_profile.urls')),
+    path('api/v1/', include('api.urls')),
     path('', to_news),
 ]
 

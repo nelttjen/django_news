@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+    <title>View Post</title>
+    <link rel="stylesheet" href="{% static "news/css/view_post.css" %}?{{ reload }}">
+    <script src="{% static "news/js/view_posts.js"%}?{{reload}}"></script>
+{% endblock %}
+{% block container %}
+    <div class="post-card">
+        <div class="post-header">
+
+        </div>
+        <h2 class="post-title">
+            {{ post.title }}
+        </h2>
+        {% if post.image %}    
+        <img src="{{ post.image.url }}" alt="">
+        {% endif %}
+        <p class="post-content">
+            {{ post.content }}
+        </p>
+    </div>
+
+{% endblock %}

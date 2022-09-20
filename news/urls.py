@@ -14,7 +14,8 @@ urlpatterns = [
     path('', index),
     path('new_post/', new_post),
     path('my_posts/', my_posts),
-    re_path(r'^my_posts/edit/id(?P<post_id>\d+)$', edit_post)
+    re_path(r'^my_posts/edit/id(?P<post_id>\d+)$', edit_post),
+    re_path(r'^posts/id(?P<post_id>\d+)$', view_post)
 ] + ajax
 
 if DEBUG:

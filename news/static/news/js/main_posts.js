@@ -31,28 +31,28 @@ function like_ajax(e) {
 
     $.ajax({
         type: "POST",
-        url: `/news/api/like`,
+        url: `/api/v1/likes/${post_id}`,
         data: {
             "token": token,
-            "post_id": post_id,
             "method": method
         },
         headers: {
             'X-CSRFToken': csrf,
         },
         success: function (response) {
-            like_p.html(response['likes']);
-            if (method === 'remove') {
-                btn.html('<img src="/static/news/img/like.png" alt="" width="32" height="32">');
-                btn.removeClass("active");
-            } else {
-                btn.html('<img src="/static/news/img/like_active.png" alt="" width="32" height="32">');
-                btn.addClass("active");
-            }
+            if (response['message'] === 'OK') {
+                like_p.html(response['likes']);
+                if (method === 'remove') {
+                    btn.html('<img src="/static/news/img/like.png" alt="" width="32" height="32">');
+                    btn.removeClass("active");
+                } else {
+                    btn.html('<img src="/static/news/img/like_active.png" alt="" width="32" height="32">');
+                    btn.addClass("active");
+                }
+            } 
+            else alert('Что-то пошло не так. Перезагрузите страницу.');
         }
-    }).fail(function () { 
-        alert('Что-то пошло не так. Перезагрузите страницу.');
-     });
+    })
 }
 
 

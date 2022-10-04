@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from .forms import PostForm, TagSelectionForm, SearchForm
 from .models import Post, Tag, Like
 from .util import LATEST_MAX_POSTS, LIKED_MAX_POSTS, MAIN_MAX_POSTS
-from .util import user_token, get_posts_for_user, check_user_token_valid
+from .util import user_token, get_posts_for_user, check_user_token_valid, check_cookie
 
 
 def get_tag_link(form, match=False):
@@ -53,11 +53,24 @@ def index(request):
         'main_posts': main_posts,
     }
     response = render(request, 'news/main_posts.html', context=data)
-    if request.COOKIES.get('user_token'):
-        if not check_user_token_valid(request.COOKIES.get('user_token')) and token:
-            response.set_cookie("user_token", token.token)
-    elif token:
-        response.set_cookie("user_token", token.token)
+    check_cookie(request, response, token)
+    return response
+
+
+def view_post(request, post_id):
+    try:
+        post = Post.objects.get(pk=post_id)
+    except ObjectDoesNotExist:
+        return redirect('/news/')
+    token = user_token(request.user)
+
+    data = {
+        'form': None,
+        'post': post,
+    }
+
+    response = render(request, 'news/view_post.html', context=data)
+    check_cookie(request, response, token)
     return response
 
 

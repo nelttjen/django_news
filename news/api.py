@@ -44,34 +44,4 @@ def ajax_load_more_news(request):
 
 
 def ajax_like(request):
-    try:
-        assert is_ajax(request), 'not ajax'
-        assert request.method == 'POST', 'not post'
-        token = request.POST.get('token')
-        post_id = request.POST.get('post_id')
-        method = request.POST.get('method')
-        assert all([i is not None for i in [token, post_id, method]]), "data wrong"
-        assert method in ['add', 'remove'], 'method wrong'
-        assert check_user_token_valid(token), 'token fail'
-
-        user = get_user_by_token(token)
-        post = Post.objects.get(pk=post_id)
-        if method == 'add':
-            if not Like.objects.filter(post=post).filter(user=user).exists():
-                Like.objects.create(
-                    post=post,
-                    user=user
-                )
-        elif method == 'remove':
-            _prev = Like.objects.filter(post=post).filter(user=user).first()
-            if _prev:
-                _prev.delete()
-
-        likes = len(post.like_set.all())
-        return JsonResponse({
-            'message': 'OK',
-            'likes': likes
-        })
-    except (AssertionError, ObjectDoesNotExist) as e:
-        print(e)
-        return HttpResponseForbidden()
+    pass

@@ -66,3 +66,11 @@ def get_posts_default():
     ).filter(
         creation_date__range=[days_30, now]
     ).all()
+
+
+def check_cookie(request, response, token):
+    if request.COOKIES.get('user_token'):
+        if not check_user_token_valid(request.COOKIES.get('user_token')) and token:
+            response.set_cookie("user_token", token.token)
+    elif token:
+        response.set_cookie("user_token", token.token)

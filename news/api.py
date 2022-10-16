@@ -9,13 +9,13 @@ from news.util import AJAX_MAX_POSTS
 
 def ajax_load_more_news(request):
     try:
-        assert is_ajax(request)
-        assert request.method == 'POST'
+        assert is_ajax(request), 'not ajax'
+        assert request.method == 'POST', 'not POST'
         post_id = request.POST.get('post_id')
         user_token = request.POST.get('user_token')
-        assert post_id
+        assert post_id, 'no post_id'
         if user_token:
-            assert check_user_token_valid(user_token)
+            assert check_user_token_valid(user_token), 'user token fail'
             user = get_user_by_token(user_token)
             posts = get_posts_for_user(user)
         else:
@@ -39,7 +39,8 @@ def ajax_load_more_news(request):
             }
             data.append(item)
         return JsonResponse({'data': data})
-    except (AssertionError, ObjectDoesNotExist):
+    except (AssertionError, ObjectDoesNotExist) as e:
+        print(e)
         return HttpResponseForbidden()
 
 

@@ -164,8 +164,10 @@ cython_debug/
 static/admin
 static/authorize
 static/news
-*.env
+news_django/.env
 user_profile/static/user_profile/img/default.png
 user_profile/static/user_profile/img/profile_images
 *.bat
 uploads
+
+.docker-compose.yml.swp

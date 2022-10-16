@@ -42,9 +42,9 @@ ALLOWED_HOSTS = ['127.0.0.1']
 STATIC_URL = '/static/'
 # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = (
-        os.path.join(BASE_DIR, 'authorize\\static'),
-        os.path.join(BASE_DIR, 'news\\static'),
-        os.path.join(BASE_DIR, 'user_profile\\static'),
+        os.path.join(BASE_DIR, 'authorize/static'),
+        os.path.join(BASE_DIR, 'news/static'),
+        os.path.join(BASE_DIR, 'user_profile/static'),
         os.path.join(BASE_DIR, 'static'),
         os.path.join(BASE_DIR, 'uploads'),
 )
@@ -107,9 +107,9 @@ WSGI_APPLICATION = 'news_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'db',
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
+        'NAME': env('POSTGRES_DB'),
+        'USER': env('POSTGRES_USER'),
+        'PASSWORD': env('POSTGRES_PASSWORD'),
         'HOST': 'localhost',
         'POST': '5432',
     }
